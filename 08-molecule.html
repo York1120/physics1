@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分子热运动微观示意图</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .matter-container {
+            width: 30%;
+            height: 500px; /* 增加容器高度以适应更多分子 */
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            background-color: white;
+        }
+        
+        #solid-container {
+            background-color: #f9f9f9;
+        }
+        
+        #liquid-container {
+            background-color: #e3f2fd;
+        }
+        
+        #gas-container {
+            background-color: #e8f5e9;
+        }
+        
+        .matter-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 10;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 5;
+        }
+        
+        .iron-atom {
+            background-color: #e74c3c;
+        }
+        
+        .oxygen-atom {
+            background-color: #3498db;
+        }
+        
+        .hydrogen-atom {
+            background-color: #8B4513; /* 棕色 */
+        }
+        
+        .controls {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .slider-label {
+            width: 100px;
+            text-align: right;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .slider {
+            flex-grow: 1;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            outline: none;
+            border-radius: 5px;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        
+        .temperature-display {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .description {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .molecule {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <h1>分子热运动微观示意图</h1>
+    
+    <div class="container">
+        <div class="matter-container" id="solid-container">
+            <div class="matter-label">固体（铁原子）</div>
+        </div>
+        <div class="matter-container" id="liquid-container">
+            <div class="matter-label">液体（水分子）</div>
+        </div>
+        <div class="matter-container" id="gas-container">
+            <div class="matter-label">气体（氧气分子）</div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <div class="slider-container">
+            <div class="slider-label">温度调节:</div>
+            <input type="range" min="0" max="100" value="50" class="slider" id="temperature-slider">
+        </div>
+        <div class="temperature-display">
+            当前温度: <span id="temperature-value">50</span>°C
+        </div>
+    </div>
+    
+    <div class="description">
+        <h3>说明:</h3>
+        <p>本演示展示了固体、液体和气体在不同温度下的分子运动情况。</p>
+        <ul>
+            <li><strong>固体（铁原子）</strong>: 80个红色大球体，排列紧密，只能在固定位置附近振动</li>
+            <li><strong>液体（水分子）</strong>: 30个水分子（蓝色氧原子和两个棕色氢原子组成），键角104.5°，可以自由移动</li>
+            <li><strong>气体（氧气分子）</strong>: 12个氧气分子（两个蓝色氧原子组成），自由运动，充满整个容器</li>
+        </ul>
+        <p>使用温度滑块可以调节温度，观察分子运动速度的变化。</p>
+    </div>
+    
+    <script>
+        // 粒子数量（修改为80,30,12）
+        const SOLID_PARTICLE_COUNT = 80;
+        const LIQUID_PARTICLE_COUNT = 30;
+        const GAS_PARTICLE_COUNT = 12;
+        
+        // 原子大小
+        const IRON_ATOM_SIZE = 16;
+        const OXYGEN_ATOM_SIZE = 10;
+        const HYDROGEN_ATOM_SIZE = 6;
+        
+        // 初始速度范围
+        let solidSpeedRange = [0.1, 0.5];
+        let liquidSpeedRange = [1, 3];
+        let gasSpeedRange = [3, 8];
+        
+        // 温度因子 (0-1)
+        let temperatureFactor = 0.5;
+        
+        // 获取容器元素
+        const solidContainer = document.getElementById('solid-container');
+        const liquidContainer = document.getElementById('liquid-container');
+        const gasContainer = document.getElementById('gas-container');
+        
+        // 获取滑块和温度显示元素
+        const temperatureSlider = document.getElementById('temperature-slider');
+        const temperatureValue = document.getElementById('temperature-value');
+        
+        // 粒子数组
+        let solidParticles = [];
+        let liquidMolecules = [];
+        let gasMolecules = [];
+        
+        // 初始化粒子
+        function initParticles() {
+            // 清空容器
+            solidContainer.innerHTML = '<div class="matter-label">固体（铁原子）</div>';
+            liquidContainer.innerHTML = '<div class="matter-label">液体（水分子）</div>';
+            gasContainer.innerHTML = '<div class="matter-label">气体（氧气分子）</div>';
+            
+            // 创建固体粒子（铁原子）
+            for (let i = 0; i < SOLID_PARTICLE_COUNT; i++) {
+                createSolidParticle();
+            }
+            
+            // 创建液体分子（水分子）
+            for (let i = 0; i < LIQUID_PARTICLE_COUNT; i++) {
+                createWaterMolecule();
+            }
+            
+            // 创建气体分子（氧气分子）
+            for (let i = 0; i < GAS_PARTICLE_COUNT; i++) {
+                createOxygenMolecule();
+            }
+        }
+        
+        // 创建固体粒子（铁原子）
+        function createSolidParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle iron-atom';
+            
+            // 设置粒子大小
+            particle.style.width = `${IRON_ATOM_SIZE}px`;
+            particle.style.height = `${IRON_ATOM_SIZE}px`;
+            
+            // 获取容器尺寸
+            const containerWidth = solidContainer.offsetWidth;
+            const containerHeight = solidContainer.offsetHeight;
+            
+            // 固体粒子排列成网格
+            const cols = Math.floor(Math.sqrt(SOLID_PARTICLE_COUNT));
+            const rows = Math.ceil(SOLID_PARTICLE_COUNT / cols);
+            const spacingX = containerWidth / (cols + 1);
+            const spacingY = containerHeight / (rows + 1);
+            
+            const index = solidContainer.childElementCount - 1; // 减去标签
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            
+            const x = spacingX * (col + 1) - IRON_ATOM_SIZE / 2;
+            const y = spacingY * (row + 1) - IRON_ATOM_SIZE / 2;
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            
+            // 随机速度
+            const vx = (Math.random() * 2 - 1) * solidSpeedRange[1] * temperatureFactor;
+            const vy = (Math.random() * 2 - 1) * solidSpeedRange[1] * temperatureFactor;
+            
+            // 添加到容器
+            solidContainer.appendChild(particle);
+            
+            // 保存粒子数据
+            solidParticles.push({
+                element: particle,
+                x: x,
+                y: y,
+                vx: vx,
+                vy: vy,
+                originalX: x,
+                originalY: y,
+                size: IRON_ATOM_SIZE
+            });
+        }
+        
+        // 创建水分子
+        function createWaterMolecule() {
+            const molecule = document.createElement('div');
+            molecule.className = 'molecule';
+            
+            // 获取容器尺寸
+            const containerWidth = liquidContainer.offsetWidth;
+            const containerHeight = liquidContainer.offsetHeight;
+            
+            // 随机位置
+            const centerX = Math.random() * (containerWidth - 40);
+            const centerY = Math.random() * (containerHeight - 40);
+            
+            molecule.style.left = `${centerX}px`;
+            molecule.style.top = `${centerY}px`;
+            
+            // 创建氧原子
+            const oxygen = document.createElement('div');
+            oxygen.className = 'particle oxygen-atom';
+            oxygen.style.width = `${OXYGEN_ATOM_SIZE}px`;
+            oxygen.style.height = `${OXYGEN_ATOM_SIZE}px`;
+            oxygen.style.left = '0px';
+            oxygen.style.top = '0px';
+            molecule.appendChild(oxygen);
+            
+            // 创建氢原子
+            const bondLength = 15; // 键长
+            const angle = 104.5 * (Math.PI / 180); // 键角转换为弧度
+            
+            // 第一个氢原子
+            const hydrogen1 = document.createElement('div');
+            hydrogen1.className = 'particle hydrogen-atom';
+            hydrogen1.style.width = `${HYDROGEN_ATOM_SIZE}px`;
+            hydrogen1.style.height = `${HYDROGEN_ATOM_SIZE}px`;
+            hydrogen1.style.left = `${-bondLength * Math.sin(angle/2)}px`;
+            hydrogen1.style.top = `${-bondLength * Math.cos(angle/2)}px`;
+            molecule.appendChild(hydrogen1);
+            
+            // 第二个氢原子
+            const hydrogen2 = document.createElement('div');
+            hydrogen2.className = 'particle hydrogen-atom';
+            hydrogen2.style.width = `${HYDROGEN_ATOM_SIZE}px`;
+            hydrogen2.style.height = `${HYDROGEN_ATOM_SIZE}px`;
+            hydrogen2.style.left = `${bondLength * Math.sin(angle/2)}px`;
+            hydrogen2.style.top = `${-bondLength * Math.cos(angle/2)}px`;
+            molecule.appendChild(hydrogen2);
+            
+            // 随机速度
+            const angleDir = Math.random() * Math.PI * 2;
+            const speed = liquidSpeedRange[0] + Math.random() * (liquidSpeedRange[1] - liquidSpeedRange[0]);
+            const vx = Math.cos(angleDir) * speed * temperatureFactor;
+            const vy = Math.sin(angleDir) * speed * temperatureFactor;
+            
+            // 添加到容器
+            liquidContainer.appendChild(molecule);
+            
+            // 保存分子数据
+            liquidMolecules.push({
+                element: molecule,
+                x: centerX,
+                y: centerY,
+                vx: vx,
+                vy: vy,
+                size: OXYGEN_ATOM_SIZE,
+                atoms: [oxygen, hydrogen1, hydrogen2]
+            });
+        }
+        
+        // 创建氧气分子
+        function createOxygenMolecule() {
+            const molecule = document.createElement('div');
+            molecule.className = 'molecule';
+            
+            // 获取容器尺寸
+            const containerWidth = gasContainer.offsetWidth;
+            const containerHeight = gasContainer.offsetHeight;
+            
+            // 随机位置
+            const centerX = Math.random() * (containerWidth - 30);
+            const centerY = Math.random() * (containerHeight - 30);
+            
+            molecule.style.left = `${centerX}px`;
+            molecule.style.top = `${centerY}px`;
+            
+            // 创建第一个氧原子
+            const oxygen1 = document.createElement('div');
+            oxygen1.className = 'particle oxygen-atom';
+            oxygen1.style.width = `${OXYGEN_ATOM_SIZE}px`;
+            oxygen1.style.height = `${OXYGEN_ATOM_SIZE}px`;
+            oxygen1.style.left = '-10px';
+            oxygen1.style.top = '0px';
+            molecule.appendChild(oxygen1);
+            
+            // 创建第二个氧原子
+            const oxygen2 = document.createElement('div');
+            oxygen2.className = 'particle oxygen-atom';
+            oxygen2.style.width = `${OXYGEN_ATOM_SIZE}px`;
+            oxygen2.style.height = `${OXYGEN_ATOM_SIZE}px`;
+            oxygen2.style.left = '10px';
+            oxygen2.style.top = '0px';
+            molecule.appendChild(oxygen2);
+            
+            // 随机速度
+            const angle = Math.random() * Math.PI * 2;
+            const speed = gasSpeedRange[0] + Math.random() * (gasSpeedRange[1] - gasSpeedRange[0]);
+            const vx = Math.cos(angle) * speed * temperatureFactor;
+            const vy = Math.sin(angle) * speed * temperatureFactor;
+            
+            // 添加到容器
+            gasContainer.appendChild(molecule);
+            
+            // 保存分子数据
+            gasMolecules.push({
+                element: molecule,
+                x: centerX,
+                y: centerY,
+                vx: vx,
+                vy: vy,
+                size: OXYGEN_ATOM_SIZE,
+                atoms: [oxygen1, oxygen2]
+            });
+        }
+        
+        // 更新粒子位置
+        function updateParticles() {
+            // 更新固体粒子（铁原子）
+            solidParticles.forEach(p => {
+                // 固体粒子在原始位置附近振动
+                if (p.x < p.originalX - 5 || p.x > p.originalX + 5) {
+                    p.vx *= -1;
+                }
+                if (p.y < p.originalY - 5 || p.y > p.originalY + 5) {
+                    p.vy *= -1;
+                }
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                p.element.style.left = `${p.x}px`;
+                p.element.style.top = `${p.y}px`;
+            });
+            
+            // 更新液体分子（水分子）
+            liquidMolecules.forEach(m => {
+                const containerWidth = liquidContainer.offsetWidth;
+                const containerHeight = liquidContainer.offsetHeight;
+                
+                // 边界检测
+                if (m.x <= 0 || m.x >= containerWidth - 40) {
+                    m.vx *= -1;
+                }
+                if (m.y <= 0 || m.y >= containerHeight - 40) {
+                    m.vy *= -1;
+                }
+                
+                m.x += m.vx;
+                m.y += m.vy;
+                
+                m.element.style.left = `${m.x}px`;
+                m.element.style.top = `${m.y}px`;
+            });
+            
+            // 更新气体分子（氧气分子）
+            gasMolecules.forEach(m => {
+                const containerWidth = gasContainer.offsetWidth;
+                const containerHeight = gasContainer.offsetHeight;
+                
+                // 边界检测
+                if (m.x <= 0 || m.x >= containerWidth - 30) {
+                    m.vx *= -1;
+                }
+                if (m.y <= 0 || m.y >= containerHeight - 30) {
+                    m.vy *= -1;
+                }
+                
+                m.x += m.vx;
+                m.y += m.vy;
+                
+                m.element.style.left = `${m.x}px`;
+                m.element.style.top = `${m.y}px`;
+            });
+            
+            requestAnimationFrame(updateParticles);
+        }
+        
+        // 温度滑块事件监听
+        temperatureSlider.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            temperatureValue.textContent = value;
+            
+            // 计算温度因子 (0-1)
+            temperatureFactor = value / 100;
+            
+            // 更新粒子速度
+            updateParticleSpeeds();
+        });
+        
+        // 更新粒子速度
+        function updateParticleSpeeds() {
+            // 固体粒子（铁原子）
+            solidParticles.forEach(p => {
+                // 随机振动速度
+                p.vx = (Math.random() * 2 - 1) * solidSpeedRange[1] * temperatureFactor;
+                p.vy = (Math.random() * 2 - 1) * solidSpeedRange[1] * temperatureFactor;
+            });
+            
+            // 液体分子（水分子）
+            liquidMolecules.forEach(m => {
+                // 保持当前方向，调整速度大小
+                const currentSpeed = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+                const directionX = m.vx / currentSpeed;
+                const directionY = m.vy / currentSpeed;
+                
+                const newSpeed = (liquidSpeedRange[0] + (liquidSpeedRange[1] - liquidSpeedRange[0]) * temperatureFactor) * (0.8 + Math.random() * 0.4);
+                
+                m.vx = directionX * newSpeed;
+                m.vy = directionY * newSpeed;
+            });
+            
+            // 气体分子（氧气分子）
+            gasMolecules.forEach(m => {
+                // 保持当前方向，调整速度大小
+                const currentSpeed = Math.sqrt(m.vx * m.vx + m.vy * m.vy);
+                const directionX = m.vx / currentSpeed;
+                const directionY = m.vy / currentSpeed;
+                
+                const newSpeed = (gasSpeedRange[0] + (gasSpeedRange[1] - gasSpeedRange[0]) * temperatureFactor) * (0.8 + Math.random() * 0.4);
+                
+                m.vx = directionX * newSpeed;
+                m.vy = directionY * newSpeed;
+            });
+        }
+        
+        // 初始化
+        window.addEventListener('load', function() {
+            initParticles();
+            updateParticles();
+        });
+    </script>
+</body>
+</html>

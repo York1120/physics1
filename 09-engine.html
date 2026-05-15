@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四冲程汽油机简化示意图</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5em;
+        }
+        .engine-container {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        canvas {
+            background: linear-gradient(45deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .stroke-info {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin-top: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            padding: 10px 30px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            background: linear-gradient(45deg, #cccccc, #aaaaaa);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        #resetBtn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        #resetBtn:hover {
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 15px 25px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .speed-label {
+            font-size: 16px;
+            color: white;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        input[type="range"] {
+            width: 200px;
+            height: 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        #speedValue {
+            min-width: 60px;
+            text-align: center;
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>四冲程汽油机简化示意图</h1>
+    <div class="engine-container">
+        <canvas id="engineCanvas" width="600" height="600"></canvas>
+    </div>
+    <div class="stroke-info" id="strokeInfo">冲程: 进气</div>
+    <div class="controls">
+        <div class="button-group">
+            <button id="toggleBtn">开始</button>
+            <button id="resetBtn">重置</button>
+        </div>
+        <div class="speed-control">
+            <span class="speed-label">速度:</span>
+            <input type="range" id="speedSlider" min="0.001" max="0.04" step="0.001" value="0.005">
+            <span class="speed-label" id="speedValue">0.005</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('engineCanvas');
+            const ctx = canvas.getContext('2d');
+            const strokeInfo = document.getElementById('strokeInfo');
+            const toggleBtn = document.getElementById('toggleBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const speedSlider = document.getElementById('speedSlider');
+            const speedValue = document.getElementById('speedValue');
+
+            // 比例系数 (600/450 = 1.333)
+            const scale = 1.333;
+
+            // 引擎参数
+            const engine = {
+                cylinder: {
+                    x: 300, // 225 * 1.333
+                    y: 187, // 140 * 1.333
+                    width: 133, // 100 * 1.333
+                    height: 213, // 160 * 1.333
+                    color: '#e0e0e0',
+                    wallColor: '#b0b0b0',
+                    wallThickness: 20, // 15 * 1.333
+                    coverHeight: 33, // 25 * 1.333
+                    coverWidth: 213, // 160 * 1.333
+                    coverColor: '#a0a0a0',
+                    coverHighlight: '#c0c0c0',
+                    coverShadow: '#808080'
+                },
+                piston: {
+                    x: 300, // 225 * 1.333
+                    y: 200, // 150 * 1.333
+                    width: 133, // 100 * 1.333
+                    height: 53, // 40 * 1.333
+                    color: '#ff4444',
+                    highlightColor: '#ff6666',
+                    shadowColor: '#cc3333',
+                    minY: 200, // 150 * 1.333
+                    maxY: 307, // 230 * 1.333
+                    gradient: null
+                },
+                connectingRod: {
+                    length: 160, // 120 * 1.333
+                    color: '#0066cc',
+                    highlightColor: '#0088ff',
+                    shadowColor: '#004499',
+                    lineWidth: 11 // 8 * 1.333
+                },
+                crankshaft: {
+                    x: 300, // 225 * 1.333
+                    y: 427, // 320 * 1.333
+                    radius: 40, // 30 * 1.333
+                    color: '#ffcc00',
+                    highlightColor: '#ffdd44',
+                    shadowColor: '#cc9900',
+                    angle: 0,
+                    journalRadius: 11, // 8 * 1.333
+                    armWidth: 21, // 16 * 1.333
+                    armLength: 53, // 40 * 1.333
+                    counterweightRadius: 33, // 25 * 1.333
+                    counterweightOffset: 20, // 15 * 1.333
+                    gradient: null
+                },
+                intakeValve: {
+                    x: 247, // 185 * 1.333
+                    y: 153, // 115 * 1.333
+                    width: 13, // 10 * 1.333
+                    height: 27, // 20 * 1.333
+                    color: '#00cc66',
+                    highlightColor: '#00ee88',
+                    closedY: 153, // 115 * 1.333
+                    openY: 127, // 95 * 1.333
+                    arrowColor: '#00ff00',
+                    isOpen: false
+                },
+                exhaustValve: {
+                    x: 353, // 265 * 1.333
+                    y: 153, // 115 * 1.333
+                    width: 13, // 10 * 1.333
+                    height: 27, // 20 * 1.333
+                    color: '#9966cc',
+                    highlightColor: '#aa88dd',
+                    closedY: 153, // 115 * 1.333
+                    openY: 127, // 95 * 1.333
+                    arrowColor: '#ff00ff',
+                    isOpen: false
+                },
+                sparkPlug: {
+                    x: 300, // 225 * 1.333
+                    y: 180, // 135 * 1.333
+                    width: 4, // 3 * 1.333
+                    height: 27, // 20 * 1.333
+                    headWidth: 11, // 8 * 1.333
+                    headHeight: 7, // 5 * 1.333
+                    color: '#ffffff',
+                    sparkColor: '#ffaa00',
+                    isSpark: false,
+                    flameParticles: [],
+                    gradient: null
+                },
+                currentStroke: 'intake',
+                animationId: null,
+                isRunning: false,
+                progress: 0,
+                speed: 0.005
+            };
+
+            // 初始化渐变
+            function initializeGradients() {
+                // 气缸渐变
+                engine.cylinder.gradient = ctx.createLinearGradient(
+                    engine.cylinder.x - engine.cylinder.width/2,
+                    engine.cylinder.y,
+                    engine.cylinder.x + engine.cylinder.width/2,
+                    engine.cylinder.y + engine.cylinder.height
+                );
+                engine.cylinder.gradient.addColorStop(0, '#f0f0f0');
+                engine.cylinder.gradient.addColorStop(1, '#d0d0d0');
+
+                // 活塞渐变
+                engine.piston.gradient = ctx.createLinearGradient(
+                    engine.piston.x - engine.piston.width/2,
+                    engine.piston.y,
+                    engine.piston.x + engine.piston.width/2,
+                    engine.piston.y + engine.piston.height
+                );
+                engine.piston.gradient.addColorStop(0, engine.piston.highlightColor);
+                engine.piston.gradient.addColorStop(0.5, engine.piston.color);
+                engine.piston.gradient.addColorStop(1, engine.piston.shadowColor);
+
+                // 曲轴渐变
+                engine.crankshaft.gradient = ctx.createRadialGradient(
+                    engine.crankshaft.x, engine.crankshaft.y, 0,
+                    engine.crankshaft.x, engine.crankshaft.y, engine.crankshaft.radius
+                );
+                engine.crankshaft.gradient.addColorStop(0, engine.crankshaft.highlightColor);
+                engine.crankshaft.gradient.addColorStop(1, engine.crankshaft.shadowColor);
+            }
+
+            // 创建火焰粒子
+            function createFlameParticles() {
+                engine.sparkPlug.flameParticles = [];
+                for (let i = 0; i < 40; i++) {
+                    engine.sparkPlug.flameParticles.push({
+                        x: engine.sparkPlug.x + (Math.random() - 0.5) * 33, // 25 * 1.333
+                        y: engine.sparkPlug.y + Math.random() * 53, // 40 * 1.333
+                        size: 3 + Math.random() * 7, // 2-8 * 1.333
+                        alpha: 0.8 + Math.random() * 0.2,
+                        speedX: (Math.random() - 0.5) * 3,
+                        speedY: -Math.random() * 4,
+                        color: `hsl(${30 + Math.random() * 15}, 100%, 50%)`
+                    });
+                }
+            }
+
+            // 更新火焰粒子
+            function updateFlameParticles() {
+                if (!engine.sparkPlug.isSpark) return;
+                
+                for (let i = 0; i < engine.sparkPlug.flameParticles.length; i++) {
+                    const p = engine.sparkPlug.flameParticles[i];
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    p.alpha -= 0.02;
+                    p.size -= 0.1;
+                    
+                    if (p.alpha <= 0 || p.size <= 0) {
+                        engine.sparkPlug.flameParticles[i] = {
+                            x: engine.sparkPlug.x + (Math.random() - 0.5) * 33,
+                            y: engine.sparkPlug.y + Math.random() * 53,
+                            size: 3 + Math.random() * 7,
+                            alpha: 0.8 + Math.random() * 0.2,
+                            speedX: (Math.random() - 0.5) * 3,
+                            speedY: -Math.random() * 4,
+                            color: `hsl(${30 + Math.random() * 15}, 100%, 50%)`
+                        };
+                    }
+                }
+            }
+
+            // 绘制火焰效果
+            function drawFlameEffect() {
+                if (!engine.sparkPlug.isSpark) return;
+                
+                for (const p of engine.sparkPlug.flameParticles) {
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+                
+                // 火花塞闪光效果
+                ctx.save();
+                ctx.globalAlpha = 0.7;
+                ctx.fillStyle = engine.sparkPlug.sparkColor;
+                ctx.beginPath();
+                ctx.arc(engine.sparkPlug.x, engine.sparkPlug.y, 16, 0, Math.PI * 2); // 12 * 1.333
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // 绘制箭头
+            function drawArrow(x, y, direction, color) {
+                ctx.save();
+                ctx.fillStyle = color;
+                ctx.translate(x, y);
+                
+                if (direction === 'down') {
+                    // 向下箭头（进气）
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-5, -11); // -4 * 1.333, -8 * 1.333
+                    ctx.lineTo(5, -11);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 箭头线
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, -27); // -20 * 1.333
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3; // 2 * 1.333
+                    ctx.stroke();
+                } else {
+                    // 向上箭头（排气）
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(-5, 11);
+                    ctx.lineTo(5, 11);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 箭头线
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, 27);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            // 绘制气缸盖
+            function drawCylinderCover() {
+                const coverX = engine.cylinder.x - engine.cylinder.coverWidth / 2;
+                const coverY = engine.cylinder.y - engine.cylinder.coverHeight;
+                
+                // 气缸盖主体
+                ctx.fillStyle = engine.cylinder.coverColor;
+                ctx.fillRect(
+                    coverX,
+                    coverY,
+                    engine.cylinder.coverWidth,
+                    engine.cylinder.coverHeight
+                );
+                
+                // 气缸盖高光
+                ctx.fillStyle = engine.cylinder.coverHighlight;
+                ctx.fillRect(
+                    coverX,
+                    coverY,
+                    engine.cylinder.coverWidth,
+                    4 // 3 * 1.333
+                );
+                
+                // 气缸盖阴影
+                ctx.fillStyle = engine.cylinder.coverShadow;
+                ctx.fillRect(
+                    coverX,
+                    coverY + engine.cylinder.coverHeight - 4,
+                    engine.cylinder.coverWidth,
+                    4
+                );
+            }
+
+            // 计算活塞位置，保持连杆长度不变
+            function calculatePistonPosition(angle) {
+                const crankX = engine.crankshaft.x + Math.sin(angle) * engine.crankshaft.radius;
+                const crankY = engine.crankshaft.y - Math.cos(angle) * engine.crankshaft.radius;
+                
+                const pistonY = crankY - Math.sqrt(
+                    Math.pow(engine.connectingRod.length, 2) - 
+                    Math.pow(crankX - engine.piston.x, 2)
+                );
+                
+                return {
+                    pistonY: pistonY - engine.piston.height / 2,
+                    crankX,
+                    crankY
+                };
+            }
+
+            // 绘制曲轴
+            function drawCrankshaft(angle) {
+                const journalX = engine.crankshaft.x + Math.sin(angle) * engine.crankshaft.radius;
+                const journalY = engine.crankshaft.y - Math.cos(angle) * engine.crankshaft.radius;
+                const counterweightX = engine.crankshaft.x - Math.sin(angle) * engine.crankshaft.counterweightOffset;
+                const counterweightY = engine.crankshaft.y + Math.cos(angle) * engine.crankshaft.counterweightOffset;
+                
+                ctx.save();
+                
+                // 曲轴臂阴影
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 11; // 8 * 1.333
+                ctx.shadowOffsetX = 3; // 2 * 1.333
+                ctx.shadowOffsetY = 3;
+                
+                // 曲轴臂
+                ctx.fillStyle = engine.crankshaft.gradient;
+                ctx.save();
+                ctx.translate(engine.crankshaft.x, engine.crankshaft.y);
+                ctx.rotate(angle);
+                ctx.fillRect(
+                    -engine.crankshaft.armWidth/2,
+                    -engine.crankshaft.armLength/2,
+                    engine.crankshaft.armWidth,
+                    engine.crankshaft.armLength
+                );
+                ctx.restore();
+                
+                // 配重块
+                ctx.save();
+                ctx.translate(counterweightX, counterweightY);
+                ctx.rotate(angle + Math.PI/2);
+                ctx.beginPath();
+                ctx.arc(0, 0, engine.crankshaft.counterweightRadius, -Math.PI/2, Math.PI/2);
+                ctx.lineTo(0, 0);
+                ctx.closePath();
+                ctx.fillStyle = engine.crankshaft.gradient;
+                ctx.fill();
+                ctx.restore();
+                
+                ctx.restore();
+                
+                // 曲轴销
+                ctx.fillStyle = '#ffaa00';
+                ctx.beginPath();
+                ctx.arc(journalX, journalY, engine.crankshaft.journalRadius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 曲轴中心轴
+                ctx.fillStyle = '#a0a0a0';
+                ctx.beginPath();
+                ctx.arc(engine.crankshaft.x, engine.crankshaft.y, 20, 0, Math.PI * 2); // 15 * 1.333
+                ctx.fill();
+                
+                // 曲轴中心点
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.arc(engine.crankshaft.x, engine.crankshaft.y, 4, 0, Math.PI * 2); // 3 * 1.333
+                ctx.fill();
+                
+                return { journalX, journalY };
+            }
+
+            // 绘制引擎
+            function drawEngine() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制背景网格
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < canvas.width; i += 27) { // 20 * 1.333
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, canvas.height);
+                    ctx.stroke();
+                }
+                for (let i = 0; i < canvas.height; i += 27) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(canvas.width, i);
+                    ctx.stroke();
+                }
+
+                // 气缸外壁
+                ctx.fillStyle = engine.cylinder.wallColor;
+                ctx.fillRect(
+                    engine.cylinder.x - engine.cylinder.width/2 - engine.cylinder.wallThickness,
+                    engine.cylinder.y,
+                    engine.cylinder.wallThickness,
+                    engine.cylinder.height
+                );
+                ctx.fillRect(
+                    engine.cylinder.x + engine.cylinder.width/2,
+                    engine.cylinder.y,
+                    engine.cylinder.wallThickness,
+                    engine.cylinder.height
+                );
+
+                // 气缸内腔
+                ctx.fillStyle = engine.cylinder.gradient;
+                ctx.fillRect(
+                    engine.cylinder.x - engine.cylinder.width/2,
+                    engine.cylinder.y,
+                    engine.cylinder.width,
+                    engine.cylinder.height
+                );
+
+                // 绘制气缸盖
+                drawCylinderCover();
+
+                // 计算活塞位置
+                const { pistonY, crankX, crankY } = calculatePistonPosition(engine.crankshaft.angle);
+                engine.piston.y = Math.max(pistonY, engine.cylinder.y);
+
+                // 活塞阴影
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = 20; // 15 * 1.333
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 7; // 5 * 1.333
+
+                // 活塞
+                ctx.fillStyle = engine.piston.gradient;
+                ctx.fillRect(
+                    engine.piston.x - engine.piston.width/2,
+                    engine.piston.y,
+                    engine.piston.width,
+                    engine.piston.height
+                );
+
+                ctx.shadowColor = 'transparent';
+
+                // 曲轴
+                drawCrankshaft(engine.crankshaft.angle);
+
+                // 连杆
+                ctx.strokeStyle = engine.connectingRod.color;
+                ctx.lineWidth = engine.connectingRod.lineWidth;
+                ctx.lineCap = 'round';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 7; // 5 * 1.333
+                ctx.shadowOffsetX = 3; // 2 * 1.333
+                ctx.shadowOffsetY = 3;
+                ctx.beginPath();
+                ctx.moveTo(engine.piston.x, engine.piston.y + engine.piston.height/2);
+                ctx.lineTo(crankX, crankY);
+                ctx.stroke();
+                ctx.shadowColor = 'transparent';
+
+                // 气门
+                [engine.intakeValve, engine.exhaustValve].forEach(valve => {
+                    ctx.fillStyle = valve.color;
+                    ctx.fillRect(valve.x, valve.y, valve.width, valve.height);
+                    
+                    // 绘制气门箭头
+                    if (valve.isOpen) {
+                        if (valve === engine.intakeValve) {
+                            drawArrow(valve.x + valve.width/2, valve.y + valve.height, 'down', valve.arrowColor);
+                        } else {
+                            drawArrow(valve.x + valve.width/2, valve.y - 13, 'up', valve.arrowColor); // 10 * 1.333
+                        }
+                    }
+                });
+
+                // 火花塞
+                ctx.fillStyle = '#666666';
+                ctx.fillRect(
+                    engine.sparkPlug.x - engine.sparkPlug.headWidth/2,
+                    engine.sparkPlug.y - engine.sparkPlug.headHeight,
+                    engine.sparkPlug.headWidth,
+                    engine.sparkPlug.headHeight
+                );
+                ctx.fillStyle = engine.sparkPlug.color;
+                ctx.fillRect(
+                    engine.sparkPlug.x - engine.sparkPlug.width/2,
+                    engine.sparkPlug.y - engine.sparkPlug.height,
+                    engine.sparkPlug.width,
+                    engine.sparkPlug.height
+                );
+
+                // 火焰效果
+                drawFlameEffect();
+            }
+
+            // 更新引擎状态
+            function updateEngine() {
+                engine.progress += engine.speed;
+                if (engine.progress >= 1) {
+                    engine.progress = 0;
+                    switch (engine.currentStroke) {
+                        case 'intake':
+                            engine.currentStroke = 'compression';
+                            strokeInfo.textContent = '冲程: 压缩';
+                            break;
+                        case 'compression':
+                            engine.currentStroke = 'power';
+                            strokeInfo.textContent = '冲程: 做功';
+                            engine.sparkPlug.isSpark = true;
+                            createFlameParticles();
+                            setTimeout(() => {
+                                engine.sparkPlug.isSpark = false;
+                            }, 300);
+                            break;
+                        case 'power':
+                            engine.currentStroke = 'exhaust';
+                            strokeInfo.textContent = '冲程: 排气';
+                            break;
+                        case 'exhaust':
+                            engine.currentStroke = 'intake';
+                            strokeInfo.textContent = '冲程: 进气';
+                            break;
+                    }
+                }
+
+                updateFlameParticles();
+
+                let crankshaftProgress;
+                
+                switch (engine.currentStroke) {
+                    case 'intake':
+                        engine.intakeValve.y = engine.intakeValve.openY;
+                        engine.exhaustValve.y = engine.exhaustValve.closedY;
+                        engine.intakeValve.isOpen = true;
+                        engine.exhaustValve.isOpen = false;
+                        crankshaftProgress = engine.progress;
+                        engine.crankshaft.angle = crankshaftProgress * Math.PI;
+                        break;
+                    case 'compression':
+                        engine.intakeValve.y = engine.intakeValve.closedY;
+                        engine.exhaustValve.y = engine.exhaustValve.closedY;
+                        engine.intakeValve.isOpen = false;
+                        engine.exhaustValve.isOpen = false;
+                        crankshaftProgress = engine.progress;
+                        engine.crankshaft.angle = Math.PI + crankshaftProgress * Math.PI;
+                        break;
+                    case 'power':
+                        engine.intakeValve.y = engine.intakeValve.closedY;
+                        engine.exhaustValve.y = engine.exhaustValve.closedY;
+                        engine.intakeValve.isOpen = false;
+                        engine.exhaustValve.isOpen = false;
+                        crankshaftProgress = engine.progress;
+                        engine.crankshaft.angle = 2 * Math.PI + crankshaftProgress * Math.PI;
+                        break;
+                    case 'exhaust':
+                        engine.intakeValve.y = engine.intakeValve.closedY;
+                        engine.exhaustValve.y = engine.exhaustValve.openY;
+                        engine.intakeValve.isOpen = false;
+                        engine.exhaustValve.isOpen = true;
+                        crankshaftProgress = engine.progress;
+                        engine.crankshaft.angle = 3 * Math.PI + crankshaftProgress * Math.PI;
+                        break;
+                }
+            }
+
+            // 动画循环
+            function animate() {
+                updateEngine();
+                drawEngine();
+                engine.animationId = requestAnimationFrame(animate);
+            }
+
+            // 切换动画状态
+            function toggleAnimation() {
+                if (engine.isRunning) {
+                    engine.isRunning = false;
+                    cancelAnimationFrame(engine.animationId);
+                    toggleBtn.textContent = '开始';
+                } else {
+                    engine.isRunning = true;
+                    animate();
+                    toggleBtn.textContent = '暂停';
+                }
+            }
+
+            // 重置动画
+            function resetAnimation() {
+                if (engine.isRunning) toggleAnimation();
+                
+                engine.piston.y = engine.piston.minY;
+                engine.crankshaft.angle = 0;
+                engine.intakeValve.y = engine.intakeValve.openY;
+                engine.exhaustValve.y = engine.exhaustValve.closedY;
+                engine.intakeValve.isOpen = true;
+                engine.exhaustValve.isOpen = false;
+                engine.sparkPlug.isSpark = false;
+                engine.currentStroke = 'intake';
+                engine.progress = 0;
+                strokeInfo.textContent = '冲程: 进气';
+                drawEngine();
+            }
+
+            // 更新速度
+            function updateSpeed() {
+                engine.speed = parseFloat(speedSlider.value);
+                speedValue.textContent = engine.speed.toFixed(3);
+            }
+
+            // 事件监听
+            toggleBtn.addEventListener('click', toggleAnimation);
+            resetBtn.addEventListener('click', resetAnimation);
+            speedSlider.addEventListener('input', updateSpeed);
+
+            // 初始化
+            initializeGradients();
+            updateSpeed();
+            drawEngine();
+        });
+    </script>
+</body>
+</html>

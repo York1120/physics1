@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 页面元数据设置 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>凸透镜成像虚拟实验平台</title>
+    
+    <!-- CSS样式定义 -->
+    <style>
+        /* 页面主体样式 */
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;  /* 字体设置 */
+            margin: 0;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #aedeec 0%, #0ba9e7 100%);  /* 背景渐变 */
+            min-height: 100vh;  /* 最小高度为视口高度 */
+        }
+        /* 主容器布局 */
+        .container {
+            display: flex;  /* 弹性布局 */
+            gap: 40px;  /* 子元素间距 */
+            max-width: 1400px;  /* 最大宽度 */
+            margin: 0 auto;  /* 水平居中 */
+            align-items: flex-start;  /* 顶部对齐 */
+            padding-left: 50px;  /* 左侧内边距 */
+        }
+        /* 实验区域样式 */
+        .experiment-area {
+            flex: 1;  /* 占据剩余空间 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 0;
+        }
+        
+        /* 画布样式 */
+        canvas {
+            border: 2px solid #fff;  /* 白色边框 */
+            margin-bottom: 25px;  /* 底部外边距 */
+            background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);  /* 背景渐变 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);  /* 阴影效果 */
+            border-radius: 12px;  /* 圆角 */
+            margin-left: -50px;  /* 向左偏移 */
+        }
+        .info {
+            position: relative;
+            font-size: 24px;
+            background: linear-gradient(135deg, #93a3ec 0%, #b47deb 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 380px;
+            line-height: 1.6;
+            z-index: 10;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            font-weight: 600;
+        }
+        /* 主标题样式（第一个定义） */
+        h1 {
+            text-align: center;  /* 居中对齐 */
+            color: #ffeb3b;  /* 亮黄色单色 */
+            margin-bottom: 40px;  /* 底部外边距 */
+            font-size: 54px;  /* 字体大小 */
+            font-weight: bold;  /* 粗体 */
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);  /* 文字阴影 */
+            letter-spacing: 2px;  /* 字间距 */
+            margin-left: -50px;  /* 向左偏移 */
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 1000px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        .control-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        .info {
+            position: relative;
+            font-size: 22px;
+            background: linear-gradient(135deg, #6495ED 0%, #9370DB 90%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 350px;
+            line-height: 1.6;
+            z-index: 10;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            margin-top: 150px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        input[type="range"] {
+            flex-grow: 1;
+            height: 15px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #ddd, #bbb);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        .info-line {
+            margin: 8px 0;
+            font-weight: 500;
+        }
+        .relation {
+            font-weight: bold;
+            color: #ffeb3b;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .relation-detail {
+            font-weight: bold;
+            color: #ffeb3b;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-top: 4px;
+            padding-left: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffeb3b;  /* 亮黄色单色 */
+            margin-bottom: 40px;
+            font-size: 42px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<!-- 页面主体内容 -->
+<body>
+     <!-- 主容器 -->
+     <div class="container">
+         <!-- 实验区域 -->
+         <div class="experiment-area">
+             <!-- 页面主标题 -->
+             <h1>凸透镜成像虚拟实验平台</h1>
+             
+             <!-- 凸透镜成像画布 -->
+             <canvas id="lensCanvas" width="1000" height="600"></canvas>
+             
+             <!-- 控制面板 -->
+             <div class="controls">
+                 <div class="control-group">
+                     <!-- 重置按钮 -->
+                     <button id="resetBtn">重置实验</button>
+                     
+                     <!-- 焦距调节滑块 -->
+                     <div class="slider-container">
+                         <span>焦距(f):</span>
+                         <input type="range" id="focalSlider" min="50" max="150" value="100">
+                         <span id="focalValue">10 cm</span>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         
+         <!-- 右侧信息显示区域 -->
+         <div class="info" id="info">
+             <!-- 物距显示 -->
+             <div class="info-line">物距(u): - cm</div>
+             <!-- 像距显示 -->
+             <div class="info-line">像距(v): - cm</div>
+             <!-- 焦距显示 -->
+             <div class="info-line">焦距(f): - cm</div>
+             <!-- 光屏位置显示 -->
+             <div class="info-line">光屏位置: - cm</div>
+             <!-- 成像关系显示 -->
+             <div class="info-line relation">关系: -</div>
+             <!-- 成像关系详情显示 -->
+             <div class="info-line relation-detail">-</div>
+         </div>
+     </div>
+    <script>
+        // 获取DOM元素
+        const canvas = document.getElementById('lensCanvas'); // 画布元素
+        const ctx = canvas.getContext('2d'); // 画布2D上下文
+        const resetBtn = document.getElementById('resetBtn'); // 重置按钮
+        const focalSlider = document.getElementById('focalSlider'); // 焦距滑块
+        const focalValue = document.getElementById('focalValue'); // 焦距显示值
+        const infoDisplay = document.getElementById('info'); // 信息显示区域
+
+        // 实验参数变量
+        let focalLength = 100; // 焦距（像素值）
+        let candleX = 300; // 蜡烛初始位置固定为300像素
+        let candleY = 300; // 蜡烛Y坐标
+        let candleHeight = 80; // 蜡烛高度
+        let candleWidth = 25; // 蜡烛宽度
+        let flameHeight = 20; // 火焰高度
+        let isDragging = false; // 蜡烛拖拽状态
+        let dragOffsetX = 0; // 拖拽偏移量
+        let isDraggingScreen = false; // 光屏拖拽状态
+        let isDraggingLens = false; // 透镜拖拽状态
+        let lensX = 500; // 凸透镜初始位置
+        let lensY = 300; // 透镜Y坐标
+        let screenX = 700; // 光屏初始位置
+        const screenWidth = 12; // 光屏宽度
+        const screenHeight = 180; // 光屏高度
+
+        /**
+         * 绘制箭头（在两点之间的指定位置）
+         * @param {number} x1 - 起点X坐标
+         * @param {number} y1 - 起点Y坐标
+         * @param {number} x2 - 终点X坐标
+         * @param {number} y2 - 终点Y坐标
+         * @param {number} position - 箭头位置比例（0-1，默认0.5表示中点）
+         * @param {number} size - 箭头大小
+         */
+        function drawArrowBetween(x1, y1, x2, y2, position=0.5, size=8) {
+            const angle = Math.atan2(y2 - y1, x2 - x1); // 计算两点间角度
+            const midX = x1 + (x2 - x1) * position; // 计算箭头位置X坐标
+            const midY = y1 + (y2 - y1) * position; // 计算箭头位置Y坐标
+            
+            ctx.beginPath();
+            // 绘制箭头左翼
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(midX - size * Math.cos(angle - Math.PI/6), midY - size * Math.sin(angle - Math.PI/6));
+            // 绘制箭头右翼
+            ctx.moveTo(midX, midY);
+            ctx.lineTo(midX - size * Math.cos(angle + Math.PI/6), midY - size * Math.sin(angle + Math.PI/6));
+            ctx.stroke();
+        }
+
+        /**
+         * 绘制整个实验场景
+         * 包括光轴、关键点、凸透镜、蜡烛、光屏、成像和光线
+         */
+        function drawScene() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制光轴（加长）
+            ctx.beginPath();
+            ctx.moveTo(50, 300); // 光轴起点
+            ctx.lineTo(950, 300); // 光轴终点
+            ctx.strokeStyle = '#000'; // 黑色
+            ctx.lineWidth = 3; // 线宽
+            ctx.stroke();
+            
+            // 计算透镜中心位置
+            const centerX = lensX;
+            const centerY = lensY;
+            
+            // 绘制关键光学点
+            drawKeyPoint(centerX - 2 * focalLength, centerY, '2F'); // 2倍焦距点（物方）
+            drawKeyPoint(centerX - focalLength, centerY, 'F'); // 焦点（物方）
+            drawKeyPoint(centerX, centerY, 'O'); // 光心
+            drawKeyPoint(centerX + focalLength, centerY, 'F'); // 焦点（像方）
+            drawKeyPoint(centerX + 2 * focalLength, centerY, '2F'); // 2倍焦距点（像方）
+            
+            // 绘制凸透镜（厚度随焦距变化）
+            drawLens(centerX, centerY);
+            
+            // 绘制蜡烛
+            drawCandle(candleX, candleY);
+            
+            // 绘制光屏
+            drawScreen(screenX);
+            
+            // 计算并绘制像
+            drawImage();
+            
+            // 更新信息显示
+            updateInfo();
+        }
+        
+        /**
+         * 绘制关键光学点（焦点、光心等）
+         * @param {number} x - 点的X坐标
+         * @param {number} y - 点的Y坐标
+         * @param {string} label - 点的标签文字
+         */
+        function drawKeyPoint(x, y, label) {
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2); // 绘制半径为3的圆点
+            ctx.fillStyle = '#000'; // 黑色填充
+            ctx.fill();
+            
+            ctx.font = '24px Arial'; // 设置字体
+            ctx.textAlign = 'center'; // 文字居中对齐
+            ctx.fillText(label, x, y + 30); // 在点下方30像素处绘制标签
+        }
+        
+        /**
+         * 绘制凸透镜（厚度随焦距变化）
+         * 焦距越短，透镜越厚；焦距越长，透镜越薄
+         * @param {number} x - 透镜中心X坐标
+         * @param {number} y - 透镜中心Y坐标
+         */
+        function drawLens(x, y) {
+            // 计算透镜厚度（焦距越短，透镜越厚）
+            const thickness = 15 - (focalLength - 50) / 10;
+            
+            ctx.beginPath();
+            ctx.ellipse(x, y, thickness, 100, 0, 0, Math.PI * 2); // 绘制椭圆表示凸透镜
+            ctx.strokeStyle = '#000'; // 黑色描边
+            ctx.lineWidth = 2; // 线宽2像素
+            ctx.stroke();
+        }
+        
+        /**
+         * 绘制蜡烛（包括蜡烛主体和火焰）
+         * @param {number} x - 蜡烛底部中心X坐标
+         * @param {number} y - 蜡烛底部中心Y坐标
+         */
+        function drawCandle(x, y) {
+            // 蜡烛主体（橙色矩形）
+            ctx.fillStyle = '#ff9900'; // 橙色
+            ctx.fillRect(x - candleWidth/2, y - candleHeight, candleWidth, candleHeight);
+            
+            // 火焰（红色正立三角形）
+            ctx.beginPath();
+            ctx.moveTo(x, y - candleHeight - flameHeight); // 火焰顶点
+            ctx.lineTo(x - 5, y - candleHeight); // 火焰左下角
+            ctx.lineTo(x + 5, y - candleHeight); // 火焰右下角
+            ctx.closePath();
+            ctx.fillStyle = '#ff0000'; // 红色
+            ctx.fill();
+        }
+        
+        /**
+         * 绘制光屏（用于接收实像的屏幕）
+         * @param {number} x - 光屏左侧X坐标
+         */
+        function drawScreen(x) {
+            ctx.fillStyle = '#cccccc'; // 浅灰色填充
+            ctx.fillRect(x, 300 - screenHeight/2, screenWidth, screenHeight); // 绘制光屏矩形
+            ctx.strokeStyle = '#999999'; // 深灰色描边
+            ctx.lineWidth = 1; // 线宽1像素
+            ctx.strokeRect(x, 300 - screenHeight/2, screenWidth, screenHeight); // 绘制光屏边框
+            
+            // 绘制光屏位置标记文字
+            ctx.font = '14px Arial'; // 设置字体
+            ctx.textAlign = 'center'; // 文字居中对齐
+            ctx.fillStyle = '#000'; // 黑色文字
+            ctx.fillText('光屏', x + screenWidth/2, 300 - screenHeight/2 - 8); // 在光屏上方绘制文字
+        }
+        
+        // 计算并绘制像
+        function drawImage() {
+            const centerX = lensX;
+            const u = centerX - candleX; // 物距
+            if (u === 0) return; // 蜡烛在透镜上，不成像
+            
+            const v = (focalLength * u) / (u - focalLength); // 像距公式
+            
+            // 计算放大率
+            const magnification = Math.abs(v / u);
+            
+            // 判断像是实像还是虚像
+            const isRealImage = u > focalLength;
+            
+            // 计算像的位置
+            let imageX, imageRectTop, imageFlameTop, imageFlameBottom;
+            
+            if (isRealImage) {
+                // 实像（完全倒立）
+                imageX = centerX + v;
+                // 矩形上边接触主光轴
+                imageRectTop = 300;
+                // 火焰在矩形下方
+                imageFlameTop = imageRectTop + candleHeight * magnification;
+                // 火焰底部顶点位置
+                imageFlameBottom = imageFlameTop + flameHeight * magnification;
+            } else {
+                // 虚像（正立）
+                imageX = centerX + v;
+                // 矩形下边接触主光轴
+                imageRectTop = 300 - candleHeight * magnification;
+                // 火焰在矩形上方
+                imageFlameTop = imageRectTop - flameHeight * magnification;
+                // 火焰顶部顶点位置
+                imageFlameBottom = imageFlameTop;
+            }
+            
+            // 绘制光线
+            drawRays(isRealImage, imageX, imageFlameBottom, magnification);
+            
+            // 检查光屏是否在实像位置
+            let isScreenAtImage = false;
+            if (isRealImage && Math.abs(screenX - imageX) < 5) {
+                isScreenAtImage = true;
+            }
+            
+            // 绘制像
+            if (isRealImage) {
+                // 实像（完全倒立）
+                ctx.fillStyle = isScreenAtImage ? 'rgba(0, 0, 255, 0.7)' : 'rgba(0, 0, 255, 0.5)';
+                // 蜡烛主体（矩形上边接触主光轴）
+                ctx.fillRect(imageX - candleWidth/2 * magnification, imageRectTop, 
+                            candleWidth * magnification, candleHeight * magnification);
+                
+                // 火焰（倒立三角形，在矩形下方，顶点朝下）
+                ctx.beginPath();
+                ctx.moveTo(imageX, imageFlameBottom); // 顶点在最下方
+                ctx.lineTo(imageX - 5 * magnification, imageFlameTop);
+                ctx.lineTo(imageX + 5 * magnification, imageFlameTop);
+                ctx.closePath();
+                ctx.fillStyle = isScreenAtImage ? 'rgba(255, 0, 0, 0.7)' : 'rgba(255, 0, 0, 0.5)';
+                ctx.fill();
+                
+                // 如果光屏在实像位置，绘制光屏上的像
+                if (isScreenAtImage) {
+                    ctx.fillStyle = 'rgba(0, 0, 255, 0.3)';
+                    ctx.fillRect(screenX, 300 - candleHeight * magnification / 2, 
+                                screenWidth, candleHeight * magnification);
+                    
+                    // 火焰在光屏上的像
+                    ctx.beginPath();
+                    ctx.moveTo(screenX + screenWidth/2, 300 + candleHeight * magnification / 2 + flameHeight * magnification);
+                    ctx.lineTo(screenX + screenWidth/2 - 5 * magnification, 300 + candleHeight * magnification / 2);
+                    ctx.lineTo(screenX + screenWidth/2 + 5 * magnification, 300 + candleHeight * magnification / 2);
+                    ctx.closePath();
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+                    ctx.fill();
+                }
+            } else {
+                // 虚像（正立）
+                ctx.strokeStyle = 'rgba(0, 0, 255, 0.5)';
+                ctx.setLineDash([5, 5]);
+                // 蜡烛主体（矩形下边接触主光轴）
+                ctx.strokeRect(imageX - candleWidth/2 * magnification, imageRectTop, 
+                              candleWidth * magnification, candleHeight * magnification);
+                // 火焰（正立三角形）
+                ctx.beginPath();
+                ctx.moveTo(imageX, imageFlameTop); // 顶点在上方
+                ctx.lineTo(imageX - 5 * magnification, imageFlameTop + flameHeight * magnification);
+                ctx.lineTo(imageX + 5 * magnification, imageFlameTop + flameHeight * magnification);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+        
+        /**
+         * 绘制光线路径
+         * 根据成像类型（实像/虚像）绘制红色和绿色两条主要光线
+         * @param {boolean} isRealImage - 是否为实像
+         * @param {number} imageX - 像的X坐标位置
+         * @param {number} imageFlameBottom - 像的火焰底部Y坐标
+         * @param {number} magnification - 放大率
+         */
+        function drawRays(isRealImage, imageX, imageFlameBottom, magnification) {
+            // 计算蜡烛火焰顶部Y坐标（蜡烛顶部减去火焰高度）
+            const flameTopY = candleY - candleHeight - flameHeight;
+            // 获取透镜中心坐标
+            const centerX = lensX;
+            const centerY = lensY;
+            
+            // 红色光线（平行于主光轴的光线，经过透镜后通过右侧焦点F）
+            // 这条光线从蜡烛火焰顶部发出，平行于主光轴传播
+            ctx.beginPath(); // 开始绘制路径
+            ctx.moveTo(candleX, flameTopY); // 移动到蜡烛火焰顶部位置
+            ctx.lineTo(centerX, flameTopY); // 绘制到透镜顶点的水平线
+            if (isRealImage) {
+                // 实像：经过右侧焦点F后指向像的火焰底部顶点
+                // 实像情况下，光线经过透镜折射后通过右侧焦点F
+                ctx.lineTo(centerX + focalLength, centerY); // 绘制到右侧焦点F
+                ctx.lineTo(imageX, imageFlameBottom); // 绘制到像的火焰底部顶点
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)'; // 设置红色半透明描边样式
+                ctx.lineWidth = 3; // 设置线宽为3像素
+                ctx.stroke(); // 描边路径
+                
+                // 添加箭头（蜡烛到透镜的前1/3处）
+                drawArrowBetween(candleX, flameTopY, centerX, flameTopY, 0.33);
+                // 添加箭头（透镜到F点的前1/3处）
+                drawArrowBetween(centerX, flameTopY, centerX + focalLength, centerY, 0.33);
+                // 添加箭头（F点到像点的前1/3处）
+                drawArrowBetween(centerX + focalLength, centerY, imageX, imageFlameBottom, 0.33);
+            } else {
+                // 虚像：先绘制实线部分（蜡烛到透镜，透镜到F点）
+                // 虚像情况下，光线实际传播到右侧焦点F后继续直线传播
+                ctx.lineTo(centerX + focalLength, centerY); // 绘制到右侧焦点F
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)'; // 设置红色半透明描边样式
+                ctx.lineWidth = 3; // 设置线宽为3像素
+                ctx.stroke(); // 描边路径
+                
+                // 添加箭头（蜡烛到透镜的前1/3处）
+                drawArrowBetween(candleX, flameTopY, centerX, flameTopY, 0.33);
+                // 添加箭头（透镜到F点的前1/3处）
+                drawArrowBetween(centerX, flameTopY, centerX + focalLength, centerY, 0.33);
+                
+                // 再绘制从F点继续传播的实线部分
+                // 这部分表示光线实际传播路径的延长线
+                ctx.beginPath(); // 开始新的路径
+                ctx.moveTo(centerX + focalLength, centerY); // 移动到右侧焦点F
+                // 计算光线延长线方向：根据蜡烛到透镜顶点的连线方向确定
+                const slope = (centerY - flameTopY) / (centerX + focalLength - centerX); // 计算斜率
+                const intercept = centerY - slope * (centerX + focalLength); // 计算截距
+                const virtualY = slope * (canvas.width) + intercept; // 计算在画布右侧的Y坐标
+                ctx.lineTo(canvas.width, virtualY); // 绘制到画布右侧的延长线
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)'; // 设置红色半透明描边样式
+                ctx.lineWidth = 3; // 设置线宽为3像素
+                ctx.stroke(); // 描边路径
+                
+                // 添加箭头（F点继续传播的前1/3处）
+                drawArrowBetween(centerX + focalLength, centerY, canvas.width, virtualY, 0.33);
+                
+                // 最后绘制反向延长线（虚线）
+                // 这部分表示人眼看到的虚像光线的反向延长线
+                ctx.beginPath(); // 开始新的路径
+                //ctx.moveTo(centerX + focalLength, centerY); // 移动到右侧焦点F
+                ctx.moveTo(centerX , flameTopY); // 移动到透镜顶点
+                ctx.lineTo(imageX, imageFlameBottom); // 绘制到虚像位置的虚线
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.7)'; // 设置红色半透明虚线样式
+                ctx.setLineDash([5, 3]); // 设置虚线样式（5像素实线，3像素空白）
+                ctx.lineWidth = 2.5; // 设置虚线宽度为2.5像素
+                ctx.stroke(); // 描边虚线路径
+                ctx.setLineDash([]); // 重置为实线样式
+            }
+            
+            // 绿色光线（通过光心的光线）
+            // 这条光线从蜡烛火焰顶部发出，通过透镜光心O点
+            ctx.beginPath(); // 开始绘制路径
+            ctx.moveTo(candleX, flameTopY); // 移动到蜡烛火焰顶部位置
+            if (isRealImage) {
+                // 实像：先经过光心O点，再指向像的火焰底部顶点
+                // 实像情况下，通过光心的光线传播方向不变
+                ctx.lineTo(centerX, centerY); // 绘制到透镜中心O点
+                ctx.lineTo(imageX, imageFlameBottom); // 绘制到像的火焰底部顶点
+                ctx.strokeStyle = 'rgba(34, 139, 34, 0.7)'; // 设置绿色半透明描边样式
+                ctx.lineWidth = 3; // 设置线宽为3像素
+                ctx.stroke(); // 描边路径
+                
+                // 添加箭头（蜡烛到透镜的前1/3处）
+                drawArrowBetween(candleX, flameTopY, centerX, centerY, 0.33);
+                // 添加箭头（透镜到像点的前1/3处）
+                drawArrowBetween(centerX, centerY, imageX, imageFlameBottom, 0.33);
+            } else {
+                // 虚像：反向延长线传播，汇聚于虚像顶点
+                // 虚像情况下，绘制人眼看到的反向延长线（虚线）
+                ctx.lineTo(imageX, imageFlameBottom); // 绘制到虚像位置的虚线
+                ctx.strokeStyle = 'rgba(34, 139, 34, 0.7)'; // 设置绿色半透明虚线样式
+                ctx.setLineDash([5, 3]); // 设置虚线样式（5像素实线，3像素空白）
+                ctx.lineWidth = 3; // 设置虚线宽度为3像素
+                ctx.stroke(); // 描边虚线路径
+                ctx.setLineDash([]); // 重置为实线样式
+                
+                // 绘制绿色光线的实际传播路径（通过光心后继续直线传播）
+                // 这部分表示光线实际传播的路径
+                ctx.beginPath(); // 开始新的路径
+                ctx.moveTo(candleX, flameTopY); // 移动到蜡烛火焰顶部位置
+                // 计算实际传播方向：根据蜡烛到光心的连线方向确定
+                const slope = (flameTopY - centerY) / (candleX - centerX); // 计算斜率
+                const intercept = centerY - slope * centerX; // 计算截距
+                const virtualY = slope * (canvas.width) + intercept; // 计算在画布右侧的Y坐标
+                ctx.lineTo(canvas.width, virtualY); // 绘制到画布右侧的延长线
+                ctx.strokeStyle = 'rgba(34, 139, 34, 0.7)'; // 设置绿色半透明描边样式
+                ctx.lineWidth = 3; // 设置线宽为3像素
+                ctx.stroke(); // 描边路径
+                
+                // 添加箭头（蜡烛到透镜的前1/3处）
+                drawArrowBetween(candleX, flameTopY, centerX, centerY, 0.33);
+                // 添加箭头（透镜后继续传播的前1/3处）
+                drawArrowBetween(centerX, centerY, canvas.width, virtualY, 0.33);
+            }
+        }
+        
+        /**
+         * 更新右侧信息显示区域的内容
+         * 根据当前实验参数计算并显示物距、像距、焦距、光屏位置和成像关系
+         */
+        function updateInfo() {
+            const centerX = lensX; // 透镜中心位置
+            const u = Math.abs(centerX - candleX) / 10; // 物距（转换为厘米）
+            const v = (focalLength * (centerX - candleX)) / ((centerX - candleX) - focalLength) / 10; // 像距（转换为厘米）
+            const f = focalLength / 10; // 焦距（转换为厘米）
+            const screenPos = (screenX - centerX) / 10; // 光屏位置（转换为厘米）
+            
+            let relation = ""; // 成像关系描述
+            // 根据物距和焦距的关系判断成像类型
+            if (u > 2 * f) {
+                relation = "u > 2f, f < v < 2f (倒立、缩小的实像)";
+            } else if (Math.abs(u - 2 * f) < 0.1) {
+                relation = "u = 2f, v = 2f (倒立、等大的实像)";
+            } else if (u > f && u < 2 * f) {
+                relation = "f < u < 2f, v > 2f (倒立、放大的实像)";
+            } else if (Math.abs(u - f) < 0.1) {
+                relation = "u = f, 不成像 (平行光)";
+            } else if (u < f) {
+                relation = "u < f, |v| > u (正立、放大的虚像)";
+            }
+            
+            // 检查光屏是否在实像位置
+            const isRealImage = u > f; // 是否为实像
+            const imageX = centerX + (focalLength * (centerX - candleX)) / ((centerX - candleX) - focalLength); // 像的位置
+            const isScreenAtImage = isRealImage && Math.abs(screenX - imageX) < 5; // 光屏是否在像的位置
+            
+            // 根据光屏位置添加提示信息
+            if (isScreenAtImage) {
+                relation += " (光屏上显示清晰的像)";
+            } else if (isRealImage) {
+                relation += " (移动光屏到像的位置可看到清晰的像)";
+            }
+            
+            // 分别更新每个参数的信息显示
+            const infoLines = document.querySelectorAll('.info-line');
+            infoLines[0].textContent = `物距(u): ${u.toFixed(1)} cm`;
+            infoLines[1].textContent = `像距(v): ${Math.abs(v).toFixed(1)} cm`;
+            infoLines[2].textContent = `焦距(f): ${f.toFixed(1)} cm`;
+            infoLines[3].textContent = `光屏位置: ${screenPos.toFixed(1)} cm`;
+            
+            // 将关系说明分成两行显示
+            const relationParts = relation.split(' (');
+            const relationMain = relationParts[0];
+            const relationDetail = relationParts[1] ? '(' + relationParts[1] : '';
+            
+            document.querySelector('.relation').textContent = `关系: ${relationMain}`;
+            document.querySelector('.relation-detail').textContent = relationDetail;
+        }
+        
+        /**
+         * 鼠标按下事件监听
+         * 检测用户点击了蜡烛、光屏还是凸透镜，并设置相应的拖拽状态
+         */
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect(); // 获取画布相对于视口的位置
+            const mouseX = e.clientX - rect.left; // 计算鼠标在画布上的X坐标
+            const mouseY = e.clientY - rect.top; // 计算鼠标在画布上的Y坐标
+            
+            // 检查是否点击了蜡烛（蜡烛主体和火焰区域）
+            if (mouseX >= candleX - candleWidth/2 && mouseX <= candleX + candleWidth/2 &&
+                mouseY >= candleY - candleHeight - flameHeight && mouseY <= candleY) {
+                isDragging = true; // 设置蜡烛拖拽状态
+                dragOffsetX = mouseX - candleX; // 记录点击位置与蜡烛中心的偏移量
+            }
+            // 检查是否点击了光屏
+            else if (mouseX >= screenX && mouseX <= screenX + screenWidth &&
+                     mouseY >= 200 - screenHeight/2 && mouseY <= 200 + screenHeight/2) {
+                isDraggingScreen = true; // 设置光屏拖拽状态
+                dragOffsetX = mouseX - screenX; // 记录点击位置与光屏左侧的偏移量
+            }
+            // 检查是否点击了凸透镜（透镜中心区域）
+            else if (mouseX >= lensX - 30 && mouseX <= lensX + 30 &&
+                     mouseY >= lensY - 50 && mouseY <= lensY + 50) {
+                isDraggingLens = true; // 设置透镜拖拽状态
+                dragOffsetX = mouseX - lensX; // 记录点击位置与透镜中心的偏移量
+            }
+        });
+        
+        /**
+         * 触摸开始事件监听（支持希沃平台触摸屏）
+         * 检测用户触摸了蜡烛、光屏还是凸透镜，并设置相应的拖拽状态
+         */
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 阻止默认触摸行为（如页面滚动）
+            const rect = canvas.getBoundingClientRect(); // 获取画布相对于视口的位置
+            const touch = e.touches[0]; // 获取第一个触摸点
+            const touchX = touch.clientX - rect.left; // 计算触摸点在画布上的X坐标
+            const touchY = touch.clientY - rect.top; // 计算触摸点在画布上的Y坐标
+            
+            // 检查是否触摸了蜡烛（蜡烛主体和火焰区域）
+            if (touchX >= candleX - candleWidth/2 && touchX <= candleX + candleWidth/2 &&
+                touchY >= candleY - candleHeight - flameHeight && touchY <= candleY) {
+                isDragging = true; // 设置蜡烛拖拽状态
+                dragOffsetX = touchX - candleX; // 记录触摸位置与蜡烛中心的偏移量
+            }
+            // 检查是否触摸了光屏
+            else if (touchX >= screenX && touchX <= screenX + screenWidth &&
+                     touchY >= 200 - screenHeight/2 && touchY <= 200 + screenHeight/2) {
+                isDraggingScreen = true; // 设置光屏拖拽状态
+                dragOffsetX = touchX - screenX; // 记录触摸位置与光屏左侧的偏移量
+            }
+            // 检查是否触摸了凸透镜（透镜中心区域）
+            else if (touchX >= lensX - 30 && touchX <= lensX + 30 &&
+                     touchY >= lensY - 50 && touchY <= lensY + 50) {
+                isDraggingLens = true; // 设置透镜拖拽状态
+                dragOffsetX = touchX - lensX; // 记录触摸位置与透镜中心的偏移量
+            }
+        });
+        
+        /**
+         * 鼠标移动事件监听
+         * 处理蜡烛、光屏和凸透镜的拖拽移动，并更新场景
+         * 修改：物体移动最小单位为1厘米（10像素）
+         */
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect(); // 获取画布相对于视口的位置
+            const mouseX = e.clientX - rect.left; // 计算鼠标在画布上的X坐标
+            
+            if (isDragging) {
+                // 限制蜡烛只能在透镜左侧（距离透镜至少10像素，距离画布左侧至少50像素）
+                // 修改：物体移动最小单位为1厘米（10像素）
+                let newCandleX = Math.min(lensX - 10, Math.max(50, mouseX - dragOffsetX));
+                // 将位置对齐到10像素的整数倍（1厘米的整数倍）
+                candleX = Math.round(newCandleX / 10) * 10;
+                candleY = 300; // 保持蜡烛在主光轴上
+                
+                drawScene(); // 重新绘制场景
+            } else if (isDraggingScreen) {
+                // 限制光屏只能在透镜右侧（距离透镜至少10像素，距离画布右侧不超过950像素）
+                // 修改：光屏移动最小单位为1厘米（10像素）
+                let newScreenX = Math.min(950, Math.max(lensX + 10, mouseX - dragOffsetX));
+                // 将位置对齐到10像素的整数倍（1厘米的整数倍）
+                screenX = Math.round(newScreenX / 10) * 10;
+                drawScene(); // 重新绘制场景
+            } else if (isDraggingLens) {
+                // 限制凸透镜只能在蜡烛和光屏之间移动（距离蜡烛和光屏至少10像素）
+                // 修改：透镜移动最小单位为1厘米（10像素）
+                let newLensX = Math.min(screenX - 10, Math.max(candleX + 10, mouseX - dragOffsetX));
+                // 将位置对齐到10像素的整数倍（1厘米的整数倍）
+                lensX = Math.round(newLensX / 10) * 10;
+                lensY = 300; // 保持透镜在主光轴上
+                
+                drawScene(); // 重新绘制场景
+            }
+        });
+        
+        /**
+         * 触摸移动事件监听（支持希沃平台触摸屏）
+         * 处理蜡烛、光屏和凸透镜的触摸拖拽移动，并更新场景
+         * 修改：物体移动最小单位为1厘米（10像素）
+         */
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // 阻止默认触摸行为（如页面滚动）
+            const rect = canvas.getBoundingClientRect(); // 获取画布相对于视口的位置
+            const touch = e.touches[0]; // 获取第一个触摸点
+            const touchX = touch.clientX - rect.left; // 计算触摸点在画布上的X坐标
+            
+            if (isDragging) {
+                // 限制蜡烛只能在透镜左侧（距离透镜至少10像素，距离画布左侧至少50像素）
+                // 修改：物体移动最小单位为1厘米（10像素）
+                let newCandleX = Math.min(lensX - 10, Math.max(50, touchX - dragOffsetX));
+                // 将位置对齐到10像素的整数倍（1厘米的整数倍）
+                candleX = Math.round(newCandleX / 10) * 10;
+                candleY = 300; // 保持蜡烛在主光轴上
+                
+                drawScene(); // 重新绘制场景
+            } else if (isDraggingScreen) {
+                // 限制光屏只能在透镜右侧（距离透镜至少10像素，距离画布右侧不超过950像素）
+                // 修改：光屏移动最小单位为1厘米（10像素）
+                let newScreenX = Math.min(950, Math.max(lensX + 10, touchX - dragOffsetX));
+                // 将位置对齐到10像素的整数倍（1厘米的整数倍）
+                screenX = Math.round(newScreenX / 10) * 10;
+                drawScene(); // 重新绘制场景
+            } else if (isDraggingLens) {
+                // 限制凸透镜只能在蜡烛和光屏之间移动（距离蜡烛和光屏至少10像素）
+                // 修改：透镜移动最小单位为1厘米（10像素）
+                let newLensX = Math.min(screenX - 10, Math.max(candleX + 10, touchX - dragOffsetX));
+                // 将位置对齐到10像素的整数倍（1厘米的整数倍）
+                lensX = Math.round(newLensX / 10) * 10;
+                lensY = 300; // 保持透镜在主光轴上
+                
+                drawScene(); // 重新绘制场景
+            }
+        });
+        
+        /**
+         * 鼠标松开事件监听
+         * 结束所有拖拽状态
+         */
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false; // 结束蜡烛拖拽
+            isDraggingScreen = false; // 结束光屏拖拽
+            isDraggingLens = false; // 结束透镜拖拽
+        });
+        
+        /**
+         * 触摸结束事件监听（支持希沃平台触摸屏）
+         * 当手指离开屏幕时结束所有拖拽状态
+         */
+        canvas.addEventListener('touchend', () => {
+            isDragging = false; // 结束蜡烛拖拽
+            isDraggingScreen = false; // 结束光屏拖拽
+            isDraggingLens = false; // 结束透镜拖拽
+        });
+        
+        /**
+         * 触摸取消事件监听（支持希沃平台触摸屏）
+         * 当触摸被系统取消时结束所有拖拽状态
+         */
+        canvas.addEventListener('touchcancel', () => {
+            isDragging = false; // 结束蜡烛拖拽
+            isDraggingScreen = false; // 结束光屏拖拽
+            isDraggingLens = false; // 结束透镜拖拽
+        });
+        
+        /**
+         * 鼠标离开画布事件监听
+         * 当鼠标离开画布时结束所有拖拽状态
+         */
+        canvas.addEventListener('mouseleave', () => {
+            isDragging = false; // 结束蜡烛拖拽
+            isDraggingScreen = false; // 结束光屏拖拽
+            isDraggingLens = false; // 结束透镜拖拽
+        });
+        
+        /**
+         * 重置按钮点击事件监听
+         * 将所有实验参数重置为初始值
+         */
+        resetBtn.addEventListener('click', () => {
+            candleX = 300; // 重置蜡烛位置为固定值300像素
+            screenX = 700; // 重置光屏位置
+            lensX = 500; // 重置凸透镜位置为固定值500像素
+            lensY = 300; // 重置凸透镜Y位置
+            focalLength = 100; // 重置焦距为默认值100像素（10cm）
+            focalSlider.value = 100; // 重置滑块位置
+            focalValue.textContent = '10 cm'; // 重置显示文本
+            drawScene(); // 重新绘制场景
+        });
+        
+        /**
+         * 焦距滑块输入事件监听
+         * 根据滑块值更新焦距并重新绘制场景
+         */
+        focalSlider.addEventListener('input', () => {
+            focalLength = parseInt(focalSlider.value); // 获取滑块值并转换为整数
+            focalValue.textContent = `${focalLength / 10} cm`; // 更新焦距显示（转换为厘米）
+            // 不再改变蜡烛位置，保持物体位置不变
+            drawScene(); // 重新绘制场景
+        });
+        
+        // 初始化：绘制初始场景
+        drawScene();
+    </script>
+</body>
+</html>

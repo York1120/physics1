@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光的反射与折射模拟器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .water-surface {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: #333;
+        }
+        
+        .normal-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            border-left: 1px dashed #333;
+        }
+        
+        .point-o {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background-color: #333;
+            border-radius: 50%;
+            transform: translate(-3px, -3px);
+        }
+        
+        .incident-ray {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .reflected-ray, .refracted-ray {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .ray {
+            stroke: red;
+            stroke-width: 2;
+        }
+        
+        .incident {
+            marker-end: url(#arrowhead-incident);
+        }
+        
+        .reflected {
+            stroke: blue;
+            marker-end: url(#arrowhead-reflected);
+        }
+        
+        .refracted {
+            stroke: green;
+            marker-end: url(#arrowhead-refracted);
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 800px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        label {
+            width: 120px;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+        }
+        
+        .value-display {
+            width: 50px;
+            text-align: right;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            width: 800px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .draggable-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: red;
+            border-radius: 50%;
+            cursor: move;
+            transform: translate(-6px, -6px);
+        }
+    </style>
+</head>
+<body>
+    <h1>光的反射与折射模拟器</h1>
+    
+    <div class="container" id="simulation-container">
+        <div class="water-surface"></div>
+        <div class="normal-line"></div>
+        <div class="point-o"></div>
+        <svg class="incident-ray" id="incident-ray"></svg>
+        <svg class="reflected-ray" id="reflected-ray"></svg>
+        <svg class="refracted-ray" id="refracted-ray"></svg>
+        <div class="draggable-point" id="draggable-point"></div>
+    </div>
+    
+    <div class="controls">
+        <div class="slider-container">
+            <label for="incident-angle">入射角:</label>
+            <input type="range" id="incident-angle" min="0" max="89" value="45" step="1">
+            <span class="value-display" id="angle-value">45°</span>
+        </div>
+        <div class="slider-container">
+            <label for="refractive-index">折射率(n):</label>
+            <input type="range" id="refractive-index" min="1" max="3" value="1.33" step="0.01">
+            <span class="value-display" id="index-value">1.33</span>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>使用说明:</h3>
+        <p>1. 拖动红色圆点改变入射光线方向</p>
+        <p>2. 或使用滑块调整入射角和折射率</p>
+        <p>3. 蓝色光线表示反射光线，绿色光线表示折射光线</p>
+        <p>4. 水面为水平线，法线为中间的虚线</p>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const container = document.getElementById('simulation-container');
+        const incidentRaySvg = document.getElementById('incident-ray');
+        const reflectedRaySvg = document.getElementById('reflected-ray');
+        const refractedRaySvg = document.getElementById('refracted-ray');
+        const draggablePoint = document.getElementById('draggable-point');
+        const incidentAngleSlider = document.getElementById('incident-angle');
+        const angleValueDisplay = document.getElementById('angle-value');
+        const refractiveIndexSlider = document.getElementById('refractive-index');
+        const indexValueDisplay = document.getElementById('index-value');
+        
+        // 容器尺寸和中心点
+        const containerWidth = container.offsetWidth;
+        const containerHeight = container.offsetHeight;
+        const centerX = containerWidth / 2;
+        const centerY = containerHeight / 2;
+        
+        // 初始化参数
+        let incidentAngle = 45; // 入射角（度）
+        let refractiveIndex = 1.33; // 折射率（水）
+        let isDragging = false;
+        let isRightSide = false; // 标记光线是否从右侧入射
+        
+        // 初始化SVG箭头标记
+        function initArrowMarkers() {
+            // 入射光线箭头（朝向入射点）
+            const arrowheadIncident = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            arrowheadIncident.setAttribute("id", "arrowhead-incident");
+            arrowheadIncident.setAttribute("markerWidth", "10");
+            arrowheadIncident.setAttribute("markerHeight", "7");
+            arrowheadIncident.setAttribute("refX", "0");
+            arrowheadIncident.setAttribute("refY", "3.5");
+            arrowheadIncident.setAttribute("orient", "auto");
+            
+            const arrowPathIncident = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            arrowPathIncident.setAttribute("d", "M10,0 L0,3.5 L10,7");
+            arrowPathIncident.setAttribute("fill", "red");
+            
+            arrowheadIncident.appendChild(arrowPathIncident);
+            incidentRaySvg.appendChild(arrowheadIncident);
+            
+            // 反射光线箭头（远离入射点）
+            const arrowheadReflected = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            arrowheadReflected.setAttribute("id", "arrowhead-reflected");
+            arrowheadReflected.setAttribute("markerWidth", "10");
+            arrowheadReflected.setAttribute("markerHeight", "7");
+            arrowheadReflected.setAttribute("refX", "8");
+            arrowheadReflected.setAttribute("refY", "3.5");
+            arrowheadReflected.setAttribute("orient", "auto");
+            
+            const arrowPathReflected = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            arrowPathReflected.setAttribute("d", "M0,0 L10,3.5 L0,7");
+            arrowPathReflected.setAttribute("fill", "blue");
+            
+            arrowheadReflected.appendChild(arrowPathReflected);
+            reflectedRaySvg.appendChild(arrowheadReflected);
+            
+            // 折射光线箭头（远离入射点）
+            const arrowheadRefracted = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+            arrowheadRefracted.setAttribute("id", "arrowhead-refracted");
+            arrowheadRefracted.setAttribute("markerWidth", "10");
+            arrowheadRefracted.setAttribute("markerHeight", "7");
+            arrowheadRefracted.setAttribute("refX", "8");
+            arrowheadRefracted.setAttribute("refY", "3.5");
+            arrowheadRefracted.setAttribute("orient", "auto");
+            
+            const arrowPathRefracted = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            arrowPathRefracted.setAttribute("d", "M0,0 L10,3.5 L0,7");
+            arrowPathRefracted.setAttribute("fill", "green");
+            
+            arrowheadRefracted.appendChild(arrowPathRefracted);
+            refractedRaySvg.appendChild(arrowheadRefracted);
+        }
+        
+        // 计算折射角（斯涅尔定律）
+        function calculateRefractionAngle(incidentAngleDeg, n) {
+            const incidentAngleRad = incidentAngleDeg * Math.PI / 180;
+            const sinRefracted = Math.sin(incidentAngleRad) / n;
+            
+            // 全反射情况
+            if (Math.abs(sinRefracted) > 1) {
+                return null; // 表示全反射，无折射光线
+            }
+            
+            const refractedAngleRad = Math.asin(sinRefracted);
+            return refractedAngleRad * 180 / Math.PI;
+        }
+        
+        // 更新光线显示
+        function updateRays() {
+            // 清空SVG
+            incidentRaySvg.innerHTML = '';
+            reflectedRaySvg.innerHTML = '';
+            refractedRaySvg.innerHTML = '';
+            
+            // 重新添加箭头标记
+            initArrowMarkers();
+            
+            // 计算入射光线终点
+            const angleRad = incidentAngle * Math.PI / 180;
+            const rayLength = Math.min(containerWidth, containerHeight) * 0.4;
+            
+            let endX, endY;
+            if (isRightSide) {
+                // 从右侧入射
+                endX = centerX + rayLength * Math.sin(angleRad);
+                endY = centerY - rayLength * Math.cos(angleRad);
+            } else {
+                // 从左侧入射
+                endX = centerX - rayLength * Math.sin(angleRad);
+                endY = centerY - rayLength * Math.cos(angleRad);
+            }
+            
+            // 绘制入射光线（箭头朝向入射点）
+            const incidentLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            incidentLine.setAttribute("x1", endX.toString());
+            incidentLine.setAttribute("y1", endY.toString());
+            incidentLine.setAttribute("x2", centerX.toString());
+            incidentLine.setAttribute("y2", centerY.toString());
+            incidentLine.setAttribute("class", "ray incident");
+            incidentRaySvg.appendChild(incidentLine);
+            
+            // 绘制反射光线（箭头远离入射点）
+            let reflectedEndX, reflectedEndY;
+            if (isRightSide) {
+                reflectedEndX = centerX - rayLength * Math.sin(angleRad);
+                reflectedEndY = centerY - rayLength * Math.cos(angleRad);
+            } else {
+                reflectedEndX = centerX + rayLength * Math.sin(angleRad);
+                reflectedEndY = centerY - rayLength * Math.cos(angleRad);
+            }
+            
+            const reflectedLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            reflectedLine.setAttribute("x1", centerX.toString());
+            reflectedLine.setAttribute("y1", centerY.toString());
+            reflectedLine.setAttribute("x2", reflectedEndX.toString());
+            reflectedLine.setAttribute("y2", reflectedEndY.toString());
+            reflectedLine.setAttribute("class", "ray reflected");
+            reflectedRaySvg.appendChild(reflectedLine);
+            
+            // 计算并绘制折射光线（箭头远离入射点）
+            const refractionAngle = calculateRefractionAngle(incidentAngle, refractiveIndex);
+            
+            if (refractionAngle !== null) {
+                const refractionAngleRad = refractionAngle * Math.PI / 180;
+                let refractedEndX, refractedEndY;
+                
+                if (isRightSide) {
+                    // 从右侧入射，折射光线向左下方
+                    refractedEndX = centerX - rayLength * Math.sin(refractionAngleRad);
+                    refractedEndY = centerY + rayLength * Math.cos(refractionAngleRad);
+                } else {
+                    // 从左侧入射，折射光线向右下方
+                    refractedEndX = centerX + rayLength * Math.sin(refractionAngleRad);
+                    refractedEndY = centerY + rayLength * Math.cos(refractionAngleRad);
+                }
+                
+                const refractedLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                refractedLine.setAttribute("x1", centerX.toString());
+                refractedLine.setAttribute("y1", centerY.toString());
+                refractedLine.setAttribute("x2", refractedEndX.toString());
+                refractedLine.setAttribute("y2", refractedEndY.toString());
+                refractedLine.setAttribute("class", "ray refracted");
+                refractedRaySvg.appendChild(refractedLine);
+            }
+            
+            // 更新可拖动点的位置
+            draggablePoint.style.left = endX + 'px';
+            draggablePoint.style.top = endY + 'px';
+            
+            // 更新角度显示
+            angleValueDisplay.textContent = incidentAngle + '°';
+        }
+        
+        // 从点坐标计算入射角
+        function calculateAngleFromPoint(x, y) {
+            const dx = centerX - x;
+            const dy = centerY - y;
+            let angle = Math.atan2(dx, dy) * 180 / Math.PI;
+            
+            // 判断是否从右侧入射
+            isRightSide = dx < 0;
+            
+            // 确保角度在0-89度范围内
+            angle = Math.max(0, Math.min(89, Math.abs(angle)));
+            
+            return angle;
+        }
+        
+        // 初始化
+        function init() {
+            initArrowMarkers();
+            updateRays();
+            
+            // 滑块事件监听
+            incidentAngleSlider.addEventListener('input', function() {
+                incidentAngle = parseInt(this.value);
+                updateRays();
+            });
+            
+            refractiveIndexSlider.addEventListener('input', function() {
+                refractiveIndex = parseFloat(this.value);
+                indexValueDisplay.textContent = refractiveIndex.toFixed(2);
+                updateRays();
+            });
+            
+            // 可拖动点事件监听
+            draggablePoint.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    const rect = container.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    let y = e.clientY - rect.top;
+                    
+                    // 限制点在容器内
+                    x = Math.max(0, Math.min(containerWidth, x));
+                    y = Math.max(0, Math.min(containerHeight, y));
+                    
+                    // 计算新角度
+                    incidentAngle = calculateAngleFromPoint(x, y);
+                    
+                    // 更新滑块和显示
+                    incidentAngleSlider.value = incidentAngle;
+                    angleValueDisplay.textContent = incidentAngle + '°';
+                    
+                    updateRays();
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+        }
+        
+        // 启动模拟器
+        init();
+    </script>
+</body>
+</html>

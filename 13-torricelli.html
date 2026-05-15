@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>托里拆利实验 - 虚拟物理实验室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0d1642 0%, #1a237e 50%, #283593 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            font-size: 1.8em;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+        
+        .lab-area {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        canvas {
+            background: radial-gradient(ellipse at center, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .controls-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .control-group:last-child {
+            border-bottom: none;
+        }
+        
+        .control-label {
+            font-weight: bold;
+            margin-bottom: 6px;
+            display: block;
+            font-size: 0.95em;
+            color: #ffd700;
+        }
+        
+        .fluid-selector, .tube-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .fluid-btn, .tube-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        
+        .fluid-btn.active, .tube-btn.active {
+            background: rgba(255,215,0,0.2);
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255,215,0,0.3);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        .value-display {
+            min-width: 70px;
+            text-align: center;
+            background: rgba(255,215,0,0.15);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .data-display {
+            background: rgba(0,0,0,0.25);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .data-value {
+            font-weight: bold;
+            color: #00ff88;
+        }
+        
+        .highlight {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        .info-box {
+            margin-top: 15px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 0.85em;
+            line-height: 1.6;
+            border-left: 3px solid #ffd700;
+        }
+        
+        .info-box h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        
+        .step-indicator {
+            background: rgba(255,215,0,0.15);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .step-indicator h4 {
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 托里拆利实验</h1>
+            <p style="font-size:0.9em;opacity:0.9;">液体充满 → 下降形成真空 → 液面水平</p>
+        </header>
+        
+        <div class="main-layout">
+            <div class="lab-area">
+                <canvas id="simCanvas" width="750" height="580"></canvas>
+            </div>
+            
+            <div class="controls-panel">
+                <div class="step-indicator" id="stepIndicator">
+                    <h4>准备就绪</h4>
+                    <p style="font-size:0.85em;opacity:0.9;">试管已充满液体，点击"开始实验"</p>
+                </div>
+                
+                <div class="control-group">
+                    <span class="control-label">选择实验液体</span>
+                    <div class="fluid-selector">
+                        <button class="fluid-btn active" onclick="setFluid('mercury')" id="btnHg">🥈 水银</button>
+                        <button class="fluid-btn" onclick="setFluid('water')" id="btnWater">💧 水</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <span class="control-label">选择试管粗细</span>
+                    <div class="tube-selector">
+                        <button class="tube-btn" onclick="setTubeSize('thin')" id="btnThin">细管</button>
+                        <button class="tube-btn active" onclick="setTubeSize('medium')" id="btnMedium">中管</button>
+                        <button class="tube-btn" onclick="setTubeSize('thick')" id="btnThick">粗管</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <span class="control-label">实验操作</span>
+                    <button class="btn-primary" onclick="startExperiment()" id="startBtn">🚀 开始实验</button>
+                    <button class="btn-secondary" onclick="resetExperiment()">🔄 重置</button>
+                </div>
+                
+                <div class="control-group">
+                    <span class="control-label">倾斜角度（0-45°）</span>
+                    <div class="slider-container">
+                        <input type="range" id="tiltSlider" min="0" max="45" value="0" step="0.5" oninput="updateTilt(this.value)">
+                        <span class="value-display" id="tiltValue">0°</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <span class="control-label">海拔高度</span>
+                    <div class="slider-container">
+                        <input type="range" id="altitude" min="0" max="3000" value="0" step="100" oninput="updateAltitude(this.value)">
+                        <span class="value-display" id="altValue">0m</span>
+                    </div>
+                </div>
+                
+                <div class="data-display">
+                    <div class="data-item">
+                        <span>垂直高度:</span>
+                        <span class="data-value highlight" id="vHeight">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span>管内液柱长度:</span>
+                        <span class="data-value" id="tLength">--</span>
+                    </div>
+                    <div class="data-item">
+                        <span>倾斜角度:</span>
+                        <span class="data-value" id="tAngle">0°</span>
+                    </div>
+                    <div class="data-item">
+                        <span>试管内径:</span>
+                        <span class="data-value" id="tubeWidth">中管</span>
+                    </div>
+                    <div class="data-item">
+                        <span>大气压强:</span>
+                        <span class="data-value" id="pressure">101325 Pa</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h3>📐 实验原理</h3>
+                    <p>
+                        1. 试管<span class="highlight">预先充满液体</span>，用手指堵住管口<br>
+                        2. 倒置插入液槽，放开手指，液体下降<br>
+                        3. 上方形成<span class="highlight">真空</span>，液面保持水平<br>
+                        4. 垂直高度只与大气压有关，<span class="highlight">与管径、角度无关</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const FLUIDS = {
+            mercury: {
+                name: '水银',
+                density: 13595,
+                color: '#A0A0A0',
+                highlight: '#D8D8D8',
+                shadow: '#707070',
+                stdHeight: 0.76,
+                getScale: function() { return 280; }
+            },
+            water: {
+                name: '水',
+                density: 1000,
+                color: '#4FC3F7',
+                highlight: '#B3E5FC',
+                shadow: '#0288D1',
+                stdHeight: 10.33,
+                getScale: function() { return 28; }
+            }
+        };
+        
+        const TUBE_SIZES = {
+            thin: { width: 35, name: '细管', label: '15mm' },
+            medium: { width: 50, name: '中管', label: '25mm' },
+            thick: { width: 75, name: '粗管', label: '40mm' }
+        };
+        
+        let state = {
+            fluid: 'mercury',
+            tubeSize: 'medium',
+            phase: 'ready',
+            verticalHeight: 0,
+            currentLiquidLevel: 0,
+            tiltAngle: 0,
+            altitude: 0,
+            isFull: true
+        };
+        
+        const G = 9.8;
+        const P0 = 101325;
+        
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        function calculatePressure(alt) {
+            return P0 * Math.pow(1 - 2.25577e-5 * alt, 5.25588);
+        }
+        
+        function calculateHeight(pressure, density) {
+            return pressure / (density * G);
+        }
+        
+        function setFluid(type) {
+            if (state.phase !== 'ready' && state.phase !== 'settled') return;
+            state.fluid = type;
+            
+            document.getElementById('btnHg').classList.toggle('active', type === 'mercury');
+            document.getElementById('btnWater').classList.toggle('active', type === 'water');
+            
+            if (state.phase === 'ready') {
+                state.isFull = true;
+                state.currentLiquidLevel = getTubeFullHeight();
+            }
+            
+            draw();
+            updateDisplay();
+        }
+        
+        function setTubeSize(size) {
+            if (state.phase !== 'ready' && state.phase !== 'settled') return;
+            state.tubeSize = size;
+            
+            document.getElementById('btnThin').classList.toggle('active', size === 'thin');
+            document.getElementById('btnMedium').classList.toggle('active', size === 'medium');
+            document.getElementById('btnThick').classList.toggle('active', size === 'thick');
+            
+            if (state.phase === 'ready') {
+                state.isFull = true;
+                state.currentLiquidLevel = getTubeFullHeight();
+            }
+            
+            draw();
+            updateDisplay();
+        }
+        
+        function getTubeFullHeight() {
+            const f = FLUIDS[state.fluid];
+            const tubeHeightM = state.fluid === 'mercury' ? 1.2 : 13.0;
+            return tubeHeightM * f.getScale();
+        }
+        
+        function updateTilt(val) {
+            if (state.phase === 'dropping') return;
+            
+            const newAngle = parseFloat(val);
+            state.tiltAngle = newAngle;
+            
+            if (state.phase === 'settled' && state.verticalHeight > 0) {
+                const tiltRad = newAngle * Math.PI / 180;
+                const f = FLUIDS[state.fluid];
+                state.currentLiquidLevel = state.verticalHeight / Math.cos(tiltRad) * f.getScale();
+            }
+            
+            document.getElementById('tiltSlider').value = val;
+            document.getElementById('tiltValue').textContent = val + '°';
+            draw();
+            updateDisplay();
+        }
+        
+        function updateAltitude(val) {
+            state.altitude = parseInt(val);
+            document.getElementById('altValue').textContent = val + 'm';
+            
+            if (state.phase === 'settled') {
+                const f = FLUIDS[state.fluid];
+                const P = calculatePressure(state.altitude);
+                state.verticalHeight = calculateHeight(P, f.density);
+                const tiltRad = state.tiltAngle * Math.PI / 180;
+                state.currentLiquidLevel = state.verticalHeight / Math.cos(tiltRad) * f.getScale();
+                draw();
+                updateDisplay();
+            }
+        }
+        
+        function startExperiment() {
+            if (state.phase !== 'ready') return;
+            
+            state.phase = 'dropping';
+            state.isFull = false;
+            updateStepIndicator();
+            
+            const f = FLUIDS[state.fluid];
+            const P = calculatePressure(state.altitude);
+            const targetVerticalHeight = calculateHeight(P, f.density);
+            const tiltRad = state.tiltAngle * Math.PI / 180;
+            
+            const targetLiquidLevel = targetVerticalHeight / Math.cos(tiltRad) * f.getScale();
+            const startLiquidLevel = state.currentLiquidLevel;
+            
+            let startTime = null;
+            const duration = 2500;
+            
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const eased = easeOutCubic(progress);
+                
+                state.currentLiquidLevel = startLiquidLevel - (startLiquidLevel - targetLiquidLevel) * eased;
+                state.verticalHeight = (state.currentLiquidLevel / f.getScale()) * Math.cos(tiltRad);
+                
+                draw();
+                updateDisplay();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    state.phase = 'settled';
+                    state.verticalHeight = targetVerticalHeight;
+                    state.currentLiquidLevel = targetLiquidLevel;
+                    updateStepIndicator();
+                    draw();
+                    updateDisplay();
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        function resetExperiment() {
+            state.phase = 'ready';
+            state.verticalHeight = 0;
+            state.isFull = true;
+            state.tiltAngle = 0;
+            state.currentLiquidLevel = getTubeFullHeight();
+            
+            document.getElementById('tiltSlider').value = 0;
+            document.getElementById('tiltValue').textContent = '0°';
+            updateStepIndicator();
+            draw();
+            updateDisplay();
+        }
+        
+        function updateStepIndicator() {
+            const indicator = document.getElementById('stepIndicator');
+            const titles = {
+                ready: '准备就绪',
+                dropping: '液体下降中...',
+                settled: '实验完成'
+            };
+            const texts = {
+                ready: '试管已充满液体，点击"开始实验"',
+                dropping: '液体正在下降，上方形成真空',
+                settled: '液面已平衡，可调整角度观察'
+            };
+            
+            indicator.querySelector('h4').textContent = titles[state.phase];
+            indicator.querySelector('p').textContent = texts[state.phase];
+            
+            document.getElementById('startBtn').disabled = state.phase !== 'ready';
+        }
+        
+        function updateDisplay() {
+            const f = FLUIDS[state.fluid];
+            const tubeConfig = TUBE_SIZES[state.tubeSize];
+            const tiltRad = state.tiltAngle * Math.PI / 180;
+            
+            let hText;
+            if (state.phase === 'ready') {
+                hText = '--';
+            } else if (state.fluid === 'mercury') {
+                hText = (state.verticalHeight * 1000).toFixed(1) + ' mm';
+            } else {
+                hText = state.verticalHeight.toFixed(2) + ' m';
+            }
+            document.getElementById('vHeight').textContent = hText;
+            
+            let lText;
+            if (state.phase === 'ready') {
+                lText = '充满';
+            } else {
+                const tubeLength = state.verticalHeight / Math.cos(tiltRad);
+                if (state.fluid === 'mercury') {
+                    lText = (tubeLength * 1000).toFixed(1) + ' mm';
+                } else {
+                    lText = tubeLength.toFixed(2) + ' m';
+                }
+            }
+            document.getElementById('tLength').textContent = lText;
+            
+            document.getElementById('tAngle').textContent = state.tiltAngle.toFixed(1) + '°';
+            document.getElementById('tubeWidth').textContent = tubeConfig.name;
+            document.getElementById('pressure').textContent = Math.round(calculatePressure(state.altitude)) + ' Pa';
+        }
+        
+        function drawTube(x, y, width, height, tiltAngle, liquidLevel, isFull, f) {
+            const scale = f.getScale();
+            const tiltRad = tiltAngle * Math.PI / 180;
+            
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const wallThickness = Math.max(3, width * 0.08);
+            const innerWidth = width - wallThickness * 2;
+            const cylinderHeight = height - width/2;
+            const topCenterY = -cylinderHeight - width/2;
+            
+            ctx.save();
+            ctx.rotate(-tiltRad);
+            
+            const glassGrad = ctx.createLinearGradient(-width/2 - 5, 0, width/2 + 5, 0);
+            glassGrad.addColorStop(0, 'rgba(180, 200, 220, 0.7)');
+            glassGrad.addColorStop(0.1, 'rgba(220, 235, 255, 0.9)');
+            glassGrad.addColorStop(0.25, 'rgba(200, 220, 240, 0.5)');
+            glassGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.95)');
+            glassGrad.addColorStop(0.75, 'rgba(200, 220, 240, 0.5)');
+            glassGrad.addColorStop(0.9, 'rgba(220, 235, 255, 0.9)');
+            glassGrad.addColorStop(1, 'rgba(180, 200, 220, 0.7)');
+            
+            ctx.fillStyle = glassGrad;
+            ctx.beginPath();
+            ctx.moveTo(-width/2, 0);
+            ctx.lineTo(-width/2, -cylinderHeight);
+            ctx.arc(0, topCenterY, width/2, Math.PI, 0, true);
+            ctx.lineTo(width/2, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = Math.max(2, width * 0.04);
+            ctx.beginPath();
+            ctx.moveTo(-width/2 + 1, 0);
+            ctx.lineTo(-width/2 + 1, -cylinderHeight);
+            ctx.arc(0, topCenterY, width/2 - 1, Math.PI, 0, true);
+            ctx.lineTo(width/2 - 1, 0);
+            ctx.stroke();
+            
+            ctx.fillStyle = 'rgba(240, 245, 250, 0.25)';
+            ctx.beginPath();
+            ctx.moveTo(-innerWidth/2, 0);
+            ctx.lineTo(-innerWidth/2, -cylinderHeight);
+            ctx.arc(0, topCenterY, innerWidth/2, Math.PI, 0, true);
+            ctx.lineTo(innerWidth/2, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+            
+            if (liquidLevel > 0) {
+                const liquidGrad = ctx.createLinearGradient(-innerWidth, 0, innerWidth, 0);
+                liquidGrad.addColorStop(0, f.shadow);
+                liquidGrad.addColorStop(0.3, f.color);
+                liquidGrad.addColorStop(0.5, f.highlight);
+                liquidGrad.addColorStop(0.7, f.color);
+                liquidGrad.addColorStop(1, f.shadow);
+                ctx.fillStyle = liquidGrad;
+                
+                const leftWallX = -(innerWidth/2) * Math.cos(tiltRad);
+                const leftWallY = -(innerWidth/2) * Math.sin(tiltRad);
+                const leftWallTopX = leftWallX - cylinderHeight * Math.sin(tiltRad);
+                const leftWallTopY = leftWallY - cylinderHeight * Math.cos(tiltRad);
+                
+                const rightWallX = (innerWidth/2) * Math.cos(tiltRad);
+                const rightWallY = (innerWidth/2) * Math.sin(tiltRad);
+                const rightWallTopX = rightWallX - cylinderHeight * Math.sin(tiltRad);
+                const rightWallTopY = rightWallY - cylinderHeight * Math.cos(tiltRad);
+                
+                const topX = -cylinderHeight * Math.sin(tiltRad);
+                const topY_pos = -cylinderHeight * Math.cos(tiltRad);
+                
+                const liquidTopY = -liquidLevel * Math.cos(tiltRad);
+                
+                ctx.save();
+                
+                if (isFull || liquidLevel >= cylinderHeight + innerWidth/2 - 5) {
+                    ctx.beginPath();
+                    ctx.moveTo(leftWallX, leftWallY);
+                    ctx.lineTo(leftWallTopX, leftWallTopY);
+                    ctx.arc(topX, topY_pos, innerWidth/2, Math.PI - tiltRad, -tiltRad, true);
+                    ctx.lineTo(rightWallX, rightWallY);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    const tLeft = (liquidTopY - leftWallY) / (leftWallTopY - leftWallY);
+                    const intersectLeftX = leftWallX + tLeft * (leftWallTopX - leftWallX);
+                    
+                    const tRight = (liquidTopY - rightWallY) / (rightWallTopY - rightWallY);
+                    const intersectRightX = rightWallX + tRight * (rightWallTopX - rightWallX);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(leftWallX, leftWallY);
+                    ctx.lineTo(intersectLeftX, liquidTopY);
+                    ctx.lineTo(intersectRightX, liquidTopY);
+                    ctx.lineTo(rightWallX, rightWallY);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(intersectLeftX, liquidTopY);
+                    ctx.lineTo(intersectRightX, liquidTopY);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'rgba(200, 220, 240, 0.1)';
+                    ctx.beginPath();
+                    ctx.moveTo(intersectLeftX, liquidTopY);
+                    ctx.lineTo(leftWallTopX, leftWallTopY);
+                    ctx.arc(topX, topY_pos, innerWidth/2, Math.PI - tiltRad, -tiltRad, true);
+                    ctx.lineTo(rightWallTopX, rightWallTopY);
+                    ctx.lineTo(intersectRightX, liquidTopY);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                const reflectY = liquidTopY / 2;
+                ctx.beginPath();
+                ctx.ellipse(-width/8, reflectY, width/10, -liquidTopY/3, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+                
+                ctx.save();
+                ctx.rotate(-tiltRad);
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.font = `bold ${Math.max(9, width * 0.18)}px Arial`;
+                ctx.textAlign = 'right';
+                
+                const step = state.fluid === 'mercury' ? 0.076 : 1.0;
+                const maxH = state.fluid === 'mercury' ? 1.0 : 12.0;
+                for (let h = step; h <= maxH; h += step) {
+                    const y = -h * scale;
+                    if (y < -height + 15 || y > -5) continue;
+                    
+                    const isMajor = Math.round(h * 1000) % (state.fluid === 'mercury' ? 100 : 1000) === 0;
+                    const tickLen = isMajor ? Math.max(12, width * 0.3) : Math.max(6, width * 0.15);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(-width/2 - tickLen - 5, y);
+                    ctx.lineTo(-width/2 - 5, y);
+                    ctx.stroke();
+                    
+                    if (isMajor) {
+                        const label = state.fluid === 'mercury' ? 
+                            Math.round(h * 1000) + 'mm' : h.toFixed(1) + 'm';
+                        ctx.fillText(label, -width/2 - tickLen - 8, y + 3);
+                    }
+                }
+                ctx.restore();
+            }
+            
+            ctx.save();
+            ctx.rotate(-tiltRad);
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.beginPath();
+            ctx.arc(0, topCenterY, width/2 - 2, Math.PI * 1.3, Math.PI * 1.7, false);
+            ctx.lineTo(0, topCenterY);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.lineWidth = Math.max(2, width * 0.05);
+            ctx.beginPath();
+            ctx.arc(0, topCenterY, width/2 + wallThickness - 1, Math.PI * 1.15, Math.PI * 1.85, false);
+            ctx.stroke();
+            
+            ctx.restore();
+            ctx.restore();
+        }
+        
+        function draw() {
+            const bgGrad = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, canvas.width
+            );
+            bgGrad.addColorStop(0, '#f8f9fa');
+            bgGrad.addColorStop(1, '#dee2e6');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const f = FLUIDS[state.fluid];
+            const scale = f.getScale();
+            const tubeConfig = TUBE_SIZES[state.tubeSize];
+            
+            const centerX = canvas.width / 2 + 40;
+            const groundY = canvas.height - 60;
+            const troughWidth = 280;
+            const troughHeight = 70;
+            const troughX = centerX - troughWidth/2;
+            const troughY = groundY - troughHeight;
+            
+            const groundGrad = ctx.createLinearGradient(0, groundY, 0, canvas.height);
+            groundGrad.addColorStop(0, '#8D6E63');
+            groundGrad.addColorStop(1, '#5D4037');
+            ctx.fillStyle = groundGrad;
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            for (let i = 0; i < canvas.width; i += 25) {
+                ctx.fillRect(i, groundY + 5, 12, 3);
+            }
+            
+            ctx.fillStyle = 'rgba(180, 180, 180, 0.3)';
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 3;
+            ctx.fillRect(troughX, troughY, troughWidth, troughHeight);
+            ctx.strokeRect(troughX, troughY, troughWidth, troughHeight);
+            
+            ctx.fillStyle = 'rgba(230, 240, 255, 0.2)';
+            ctx.fillRect(troughX + 5, troughY + 5, troughWidth - 10, troughHeight - 10);
+            
+            // 槽内液体（只在下降后出现）
+            if (state.phase !== 'ready') {
+                const tiltRad = state.tiltAngle * Math.PI / 180;
+                const tubeBottomY = troughY + 15;
+                const tubeLiquidTopY = tubeBottomY - state.verticalHeight * scale;
+                
+                const troughBottomY = troughY + troughHeight;
+                let troughLiquidDepth = troughBottomY - tubeLiquidTopY;
+                troughLiquidDepth = Math.max(5, Math.min(troughLiquidDepth, troughHeight - 10));
+                const troughLiquidY = troughBottomY - troughLiquidDepth;
+                
+                const troughLiquidGrad = ctx.createLinearGradient(
+                    troughX, troughLiquidY, troughX + troughWidth, troughLiquidY
+                );
+                troughLiquidGrad.addColorStop(0, f.shadow);
+                troughLiquidGrad.addColorStop(0.3, f.color);
+                troughLiquidGrad.addColorStop(0.7, f.highlight);
+                troughLiquidGrad.addColorStop(1, f.shadow);
+                
+                ctx.fillStyle = troughLiquidGrad;
+                ctx.globalAlpha = 0.9;
+                ctx.fillRect(troughX + 8, troughLiquidY, troughWidth - 16, troughLiquidDepth - 5);
+                ctx.globalAlpha = 1;
+                
+                ctx.fillStyle = f.highlight;
+                ctx.fillRect(troughX + 8, troughLiquidY, troughWidth - 16, 3);
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(troughX + 30, troughLiquidY + 6, troughWidth - 70, 10);
+                
+                // 液面相平标注
+                if (state.phase === 'settled') {
+                    ctx.fillStyle = 'rgba(0, 100, 200, 0.8)';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('↔ 液面相平', centerX, troughLiquidY - 8);
+                }
+                
+                // 删除了连接管内外液面的蓝色虚线
+            }
+            
+            const tubeWidth = tubeConfig.width;
+            const tubeHeightM = state.fluid === 'mercury' ? 1.2 : 13.0;
+            const tubeHeightPx = tubeHeightM * scale;
+            const tubeBottomY = troughY + 15;
+            
+            drawTube(
+                centerX, 
+                tubeBottomY, 
+                tubeWidth, 
+                tubeHeightPx, 
+                state.tiltAngle, 
+                state.currentLiquidLevel, 
+                state.isFull,
+                f
+            );
+            
+            if (state.phase !== 'ready') {
+                const liquidTopY = tubeBottomY - state.verticalHeight * scale;
+                
+                ctx.setLineDash([8, 5]);
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                
+                const lineX = centerX - 90;
+                ctx.beginPath();
+                ctx.moveTo(lineX, tubeBottomY);
+                ctx.lineTo(lineX, liquidTopY);
+                ctx.stroke();
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(lineX, tubeBottomY, 5, 0, Math.PI * 2);
+                ctx.arc(lineX, liquidTopY, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.setLineDash([]);
+                
+                ctx.beginPath();
+                const midY = (tubeBottomY + liquidTopY) / 2;
+                ctx.moveTo(lineX + 10, tubeBottomY - 8);
+                ctx.lineTo(lineX + 10, midY);
+                ctx.lineTo(lineX + 6, midY - 4);
+                ctx.moveTo(lineX + 10, midY);
+                ctx.lineTo(lineX + 14, midY - 4);
+                
+                ctx.moveTo(lineX + 10, liquidTopY + 8);
+                ctx.lineTo(lineX + 10, midY);
+                ctx.lineTo(lineX + 6, midY + 4);
+                ctx.moveTo(lineX + 10, midY);
+                ctx.lineTo(lineX + 14, midY + 4);
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = 'bold 13px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText('垂直高度', lineX - 15, midY - 8);
+                
+                ctx.font = 'bold 15px Arial';
+                const label = state.fluid === 'mercury' ? 
+                    (state.verticalHeight * 1000).toFixed(1) + ' mm' : 
+                    state.verticalHeight.toFixed(2) + ' m';
+                ctx.fillText(label, lineX - 15, midY + 12);
+                
+                if (state.tiltAngle > 0) {
+                    ctx.setLineDash([3, 3]);
+                    ctx.strokeStyle = 'rgba(100, 149, 237, 0.5)';
+                    ctx.lineWidth = 1.5;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(troughX + 10, tubeBottomY);
+                    ctx.lineTo(lineX - 10, tubeBottomY);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(centerX - tubeWidth/2 - 10, liquidTopY);
+                    ctx.lineTo(lineX - 10, liquidTopY);
+                    ctx.stroke();
+                    
+                    ctx.setLineDash([]);
+                }
+            }
+            
+            const arrowX = centerX + 200;
+            const arrowY = tubeBottomY;
+            
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY - 80);
+            ctx.lineTo(arrowX, arrowY);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.moveTo(arrowX - 8, arrowY - 12);
+            ctx.lineTo(arrowX, arrowY);
+            ctx.lineTo(arrowX + 8, arrowY - 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.fillStyle = '#e74c3c';
+            ctx.font = 'bold 13px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('大气压强', arrowX + 12, arrowY - 40);
+            ctx.font = '11px Arial';
+            ctx.fillText('P₀ = ' + Math.round(calculatePressure(state.altitude)) + ' Pa', 
+                        arrowX + 12, arrowY - 25);
+            
+            drawLegend(20, 25, f, tubeConfig);
+        }
+        
+        function drawLegend(x, y, f, tubeConfig) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+            ctx.beginPath();
+            ctx.roundRect(x - 10, y - 10, 210, 110, 10);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#ffd700';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('⚗️ 实验参数', x, y + 15);
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px Arial';
+            ctx.fillText('液体: ' + f.name, x, y + 35);
+            ctx.fillText('密度: ' + f.density + ' kg/m³', x, y + 52);
+            ctx.fillText('试管: ' + tubeConfig.name + ' (' + tubeConfig.label + ')', x, y + 69);
+            
+            const statusText = state.phase === 'ready' ? '液体充满' : 
+                              state.phase === 'dropping' ? '下降中...' : '已平衡';
+            ctx.fillText('状态: ' + statusText, x, y + 86);
+        }
+        
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+        
+        window.onload = function() {
+            state.currentLiquidLevel = getTubeFullHeight();
+            updateStepIndicator();
+            draw();
+            updateDisplay();
+        };
+    </script>
+</body>
+</html>

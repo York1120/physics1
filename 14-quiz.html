@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《物理原来很有趣》知识测验</title>
+    <style>
+        body { 
+            font-family: "Microsoft YaHei", Arial, sans-serif; 
+            max-width: 900px; 
+            margin: 20px auto; 
+            padding: 0 20px; 
+            background-color: #f9f9ff;
+        }
+        .welcome, .end-page, .wrong-book { 
+            text-align: center; 
+            padding: 50px 20px; 
+            border-radius: 12px; 
+            background: linear-gradient(135deg, #e0f7fa, #fce4ec);
+            margin: 20px 0; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .welcome h1, .end-page h1, .wrong-book h1 {
+            color: #e91e63;
+            margin-bottom: 15px;
+        }
+        .welcome p, .wrong-book p {
+            color: #2196f3;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        /* 进度条样式 */
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            text-align: center;
+            color: #555;
+            font-size: 16px;
+            display: none;
+        }
+        .question { 
+            margin: 25px 0; 
+            padding: 20px; 
+            border: 2px solid #ffcc80;
+            border-radius: 10px; 
+            display: none; 
+            background-color: #fff;
+        }
+        .question h3 {
+            color: #f57c00;
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 20px; 
+            background-color: #4CAF50; 
+            color: white; 
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .btn:hover { 
+            background-color: #45a049; 
+            transform: translateY(-2px);
+        }
+        .result { 
+            margin-top: 10px; 
+            padding: 10px; 
+            border-radius: 6px; 
+            display: none; 
+            font-weight: bold;
+        }
+        .correct { 
+            background-color: #e8f5e9; 
+            color: #2e7d32; 
+        }
+        .incorrect { 
+            background-color: #ffebee; 
+            color: #c62828; 
+        }
+        .end-page, .wrong-book { 
+            display: none; 
+            background: linear-gradient(135deg, #fff3e0, #e8f5e9);
+        }
+        .wrong-item {
+            text-align: left;
+            padding: 15px;
+            margin: 10px auto;
+            max-width: 600px;
+            background-color: #fff;
+            border-radius: 8px;
+            border-left: 4px solid #c62828;
+        }
+        .wrong-item h4 {
+            margin: 0 0 5px 0;
+            color: #f57c00;
+        }
+        .wrong-item .correct-ans {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        #questionArea {
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 欢迎界面 -->
+    <div class="welcome" id="welcomePage">
+        <h1>欢迎你，亲爱的八年级的同学</h1>
+        <p>本次是针对《物理原来很有趣》李淼的30堂物理课一书的测试</p>
+        <p>参加测试有利于你期末物理拿下 A+</p>
+        <button class="btn" onclick="startTest()">现在我们开始测试吧</button>
+    </div>
+
+    <!-- 进度条区域 -->
+    <div class="progress-text" id="progressText">已完成 0 / 5 题</div>
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- 题目展示区域 -->
+    <div id="questionArea"></div>
+
+    <!-- 结束页 -->
+    <div class="end-page" id="endPage">
+        <h1 id="endTitle"></h1>
+        <button class="btn" onclick="restartTest()">重新测试</button>
+        <button class="btn" onclick="showWrongBook()">查看错题本</button>
+    </div>
+
+    <!-- 错题本页面 -->
+    <div class="wrong-book" id="wrongBook">
+        <h1>我的错题本</h1>
+        <div id="wrongList"></div>
+        <button class="btn" onclick="hideWrongBook()">返回测试</button>
+    </div>
+
+    <script>
+        // 30题完整题库（20选择+10判断）
+        const questionBank = [
+            // 选择题 1-20
+            {
+                type: "choice",
+                id: 1,
+                title: "水中的力量",
+                desc: "对应的是？",
+                options: {A: "阿基米德定律", B: "开普勒行星运动三大定律", C: "万有引力定律"},
+                answer: "A",
+                point: "阿基米德定律"
+            },
+            {
+                type: "choice",
+                id: 2,
+                title: "行星的旋转轨迹",
+                desc: "对应的是？",
+                options: {A: "伽利略动力学", B: "开普勒行星运动三大定律", C: "牛顿三大定律"},
+                answer: "B",
+                point: "开普勒行星运动三大定律"
+            },
+            {
+                type: "choice",
+                id: 3,
+                title: "埋葬哲学家的真理",
+                desc: "对应的是？",
+                options: {A: "万有引力定律", B: "能量守恒定律", C: "热力学第二定律"},
+                answer: "A",
+                point: "万有引力定律"
+            },
+            {
+                type: "choice",
+                id: 4,
+                title: "鬼魂是否存在",
+                desc: "对应的是？",
+                options: {A: "能量守恒定律", B: "热力学第二定律", C: "库仑定律"},
+                answer: "A",
+                point: "能量守恒定律"
+            },
+            {
+                type: "choice",
+                id: 5,
+                title: "同性相吸，异性相斥",
+                desc: "对应的是？",
+                options: {A: "库仑定律", B: "法拉第定律", C: "麦克斯韦电磁理论"},
+                answer: "A",
+                point: "库仑定律"
+            },
+            {
+                type: "choice",
+                id: 6,
+                title: "感应电流的方向",
+                desc: "对应的是？",
+                options: {A: "法拉第定律", B: "库仑定律", C: "等效原理"},
+                answer: "A",
+                point: "法拉第定律"
+            },
+            {
+                type: "choice",
+                id: 7,
+                title: "量子的猜测",
+                desc: "对应的是？",
+                options: {A: "普朗克量子假设", B: "光电效应", C: "玻尔的原子模型"},
+                answer: "A",
+                point: "普朗克量子假设"
+            },
+            {
+                type: "choice",
+                id: 8,
+                title: "爱因斯坦的创举",
+                desc: "对应的是？",
+                options: {A: "普朗克量子假设", B: "光电效应", C: "玻尔的原子模型"},
+                answer: "B",
+                point: "光电效应"
+            },
+            {
+                type: "choice",
+                id: 9,
+                title: "世界是矛盾的",
+                desc: "对应的是？",
+                options: {A: "薛定谔波动力学", B: "波粒二象性", C: "海森堡的量子力学"},
+                answer: "B",
+                point: "波粒二象性"
+            },
+            {
+                type: "choice",
+                id: 10,
+                title: "海森堡的量子力学",
+                desc: "对应的是？",
+                options: {A: "玻尔的原子模型", B: "波粒二象性", C: "海森堡的量子力学"},
+                answer: "C",
+                point: "海森堡的量子力学"
+            },
+            {
+                type: "choice",
+                id: 11,
+                title: "又死又活",
+                desc: "对应的是？",
+                options: {A: "EPR悖论", B: "薛定谔的猫", C: "泡利不相容原理"},
+                answer: "B",
+                point: "薛定谔的猫"
+            },
+            {
+                type: "choice",
+                id: 12,
+                title: "泡利不相容原理",
+                desc: "对应的是？",
+                options: {A: "量子纠缠", B: "费米子与玻色子", C: "泡利不相容原理"},
+                answer: "C",
+                point: "泡利不相容原理"
+            },
+            {
+                type: "choice",
+                id: 13,
+                title: "孤芳自赏的费米子和爱凑热闹的玻色子",
+                desc: "对应的是？",
+                options: {A: "量子通信", B: "费米子和玻色子", C: "量子计算机"},
+                answer: "B",
+                point: "费米子和玻色子"
+            },
+            {
+                type: "choice",
+                id: 14,
+                title: "改变世界的量子计算机",
+                desc: "对应的是？",
+                options: {A: "量子通信", B: "费米子和玻色子", C: "量子计算机"},
+                answer: "C",
+                point: "量子计算机"
+            },
+            {
+                type: "choice",
+                id: 15,
+                title: "宇宙中的新传播介质",
+                desc: "对应的是？",
+                options: {A: "相对论", B: "以太假说", C: "质能关系"},
+                answer: "B",
+                point: "以太假说"
+            },
+            {
+                type: "choice",
+                id: 16,
+                title: "改变世界的质能关系",
+                desc: "对应的是？",
+                options: {A: "等效原理", B: "引力场", C: "质能关系"},
+                answer: "C",
+                point: "质能关系"
+            },
+            {
+                type: "choice",
+                id: 17,
+                title: "万物皆可弯",
+                desc: "对应的是？",
+                options: {A: "等效原理", B: "引力场", C: "质能关系"},
+                answer: "B",
+                point: "引力场"
+            },
+            {
+                type: "choice",
+                id: 18,
+                title: "微观粒子的波粒特性",
+                desc: "对应的是？",
+                options: {A: "普朗克量子假设", B: "波粒二象性", C: "薛定谔波动力学"},
+                answer: "B",
+                point: "波粒二象性"
+            },
+            {
+                type: "choice",
+                id: 19,
+                title: "引力与加速度的等效",
+                desc: "对应的是？",
+                options: {A: "等效原理", B: "相对论", C: "伽利略变换式"},
+                answer: "A",
+                point: "等效原理"
+            },
+            {
+                type: "choice",
+                id: 20,
+                title: "量子世界的通信特性",
+                desc: "对应的是？",
+                options: {A: "量子纠缠", B: "量子计算机", C: "泡利不相容原理"},
+                answer: "A",
+                point: "量子纠缠"
+            },
+            // 判断题 21-30
+            {
+                type: "judge",
+                id: 21,
+                title: "感知加速度",
+                desc: "对应的是伽利略动力学",
+                answer: "对",
+                point: "伽利略动力学"
+            },
+            {
+                type: "judge",
+                id: 22,
+                title: "巨人肩膀上的胜利",
+                desc: "对应的是万有引力定律",
+                answer: "错",
+                point: "牛顿三大定律"
+            },
+            {
+                type: "judge",
+                id: 23,
+                title: "从有限到无限",
+                desc: "对应的是热力学第二定律",
+                answer: "对",
+                point: "热力学第二定律"
+            },
+            {
+                type: "judge",
+                id: 24,
+                title: "囊括宇宙所有的电磁现象",
+                desc: "对应的是麦克斯韦电磁理论",
+                answer: "对",
+                point: "麦克斯韦电磁理论"
+            },
+            {
+                type: "judge",
+                id: 25,
+                title: "量子的诞生",
+                desc: "对应的是玻尔的原子模型",
+                answer: "对",
+                point: "玻尔的原子模型"
+            },
+            {
+                type: "judge",
+                id: 26,
+                title: "量子世界里的物理运动",
+                desc: "对应的是薛定谔波动力学",
+                answer: "对",
+                point: "薛定谔波动力学"
+            },
+            {
+                type: "judge",
+                id: 27,
+                title: "靠实验确立起来的哥本哈根诠释",
+                desc: "对应的是哥本哈根诠释",
+                answer: "对",
+                point: "哥本哈根诠释"
+            },
+            {
+                type: "judge",
+                id: 28,
+                title: "一场思想实验",
+                desc: "对应的是EPR悖论",
+                answer: "对",
+                point: "EPR悖论"
+            },
+            {
+                type: "judge",
+                id: 29,
+                title: "时间与空间的绝对独立",
+                desc: "对应的是伽利略变换式",
+                answer: "对",
+                point: "伽利略变换式"
+            },
+            {
+                type: "judge",
+                id: 30,
+                title: "时间膨胀，长度可收缩",
+                desc: "对应的是相对论",
+                answer: "对",
+                point: "相对论"
+            }
+        ];
+
+        let selectedQuestions = [];   // 本次测试的5道题
+        let currentQIndex = 0;        // 当前展示的题目索引
+        let correctCount = 0;         // 答对题数
+        const testCount = 5;          // 每次测试题数
+        let wrongQuestions = [];      // 存储错题对象
+
+        // 随机抽取5题（包含错题和未测题）
+        function getRandomQuestions() {
+            // 合并错题和全题库，再随机打乱
+            const candidateQuestions = [...questionBank];
+            const shuffled = candidateQuestions.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, testCount);
+        }
+
+        // 渲染当前题目
+        function renderCurrentQuestion() {
+            const qArea = document.getElementById("questionArea");
+            qArea.innerHTML = "";
+            if (currentQIndex >= testCount) return;
+
+            const q = selectedQuestions[currentQIndex];
+            const qDiv = document.createElement("div");
+            qDiv.className = "question";
+            qDiv.style.display = "block";
+            qDiv.innerHTML = `<h3>${currentQIndex + 1}. 标题：${q.title}</h3><p>${q.desc}</p>`;
+            
+            if(q.type === "choice") {
+                for(let key in q.options) {
+                    qDiv.innerHTML += `<button class="btn" onclick="checkAnswer('${key}', this)">${key}. ${q.options[key]}</button>`;
+                }
+            } else if(q.type === "judge") {
+                qDiv.innerHTML += `<button class="btn" onclick="checkAnswer('对', this)">对</button><button class="btn" onclick="checkAnswer('错', this)">错</button>`;
+            }
+            qDiv.innerHTML += `<div class="result" id="result${currentQIndex}"></div>`;
+            qArea.appendChild(qDiv);
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progressBar = document.getElementById("progressBar");
+            const progressText = document.getElementById("progressText");
+            const progress = (currentQIndex / testCount) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `已完成 ${currentQIndex} / ${testCount} 题`;
+        }
+
+        // 开始测试
+        function startTest() {
+            document.getElementById("welcomePage").style.display = "none";
+            document.getElementById("progressContainer").style.display = "block";
+            document.getElementById("progressText").style.display = "block";
+            
+            selectedQuestions = getRandomQuestions();
+            currentQIndex = 0;
+            correctCount = 0;
+            updateProgress();
+            renderCurrentQuestion();
+        }
+
+        // 检查答案
+        function checkAnswer(selectedAns, btn) {
+            const q = selectedQuestions[currentQIndex];
+            const resultDiv = document.getElementById(`result${currentQIndex}`);
+            
+            if(selectedAns === q.answer) {
+                resultDiv.className = "result correct";
+                resultDiv.innerHTML = `✅ 回答正确！本题正确对应是：${q.point}`;
+                correctCount++;
+            } else {
+                resultDiv.className = "result incorrect";
+                resultDiv.innerHTML = `❌ 回答错误！本题正确对应是：${q.point}`;
+                // 记录错题，避免重复添加
+                const isExist = wrongQuestions.some(item => item.id === q.id);
+                if (!isExist) {
+                    wrongQuestions.push(q);
+                }
+            }
+            resultDiv.style.display = "block";
+            const btns = btn.parentElement.querySelectorAll(".btn");
+            btns.forEach(b => b.disabled = true);
+
+            // 延迟1秒后展示下一题
+            setTimeout(() => {
+                currentQIndex++;
+                updateProgress();
+                if (currentQIndex < testCount) {
+                    renderCurrentQuestion();
+                } else {
+                    // 所有题答完，显示结束页
+                    setTimeout(showEndPage, 500);
+                }
+            }, 1000);
+        }
+
+        // 显示结束页
+        function showEndPage() {
+            document.getElementById("questionArea").style.display = "none";
+            document.getElementById("progressContainer").style.display = "none";
+            document.getElementById("progressText").style.display = "none";
+            const endPage = document.getElementById("endPage");
+            const endTitle = document.getElementById("endTitle");
+            if(correctCount === testCount) {
+                endTitle.textContent = "太牛啦！期末物理A+稳稳向你招手~";
+            } else {
+                endTitle.textContent = "没关系！再来一次，下次肯定全对！";
+            }
+            endPage.style.display = "block";
+        }
+
+        // 重新测试
+        function restartTest() {
+            document.getElementById("endPage").style.display = "none";
+            document.getElementById("questionArea").style.display = "block";
+            // 重新抽题，可包含之前的错题和未测题
+            selectedQuestions = getRandomQuestions();
+            currentQIndex = 0;
+            correctCount = 0;
+            updateProgress();
+            renderCurrentQuestion();
+        }
+
+        // 显示错题本
+        function showWrongBook() {
+            document.getElementById("endPage").style.display = "none";
+            const wrongBook = document.getElementById("wrongBook");
+            const wrongList = document.getElementById("wrongList");
+            
+            if (wrongQuestions.length === 0) {
+                wrongList.innerHTML = "<p>暂无错题，继续加油！</p>";
+            } else {
+                let html = "";
+                wrongQuestions.forEach(q => {
+                    let optionStr = "";
+                    if (q.type === "choice") {
+                        for(let key in q.options) {
+                            optionStr += `${key}. ${q.options[key]}&nbsp;&nbsp;`;
+                        }
+                    }
+                    html += `
+                    <div class="wrong-item">
+                        <h4>${q.title}</h4>
+                        <p>${q.desc}</p>
+                        ${q.type === "choice" ? `<p>选项：${optionStr}</p>` : ""}
+                        <p>正确答案：<span class="correct-ans">${q.answer}（${q.point}）</span></p>
+                    </div>
+                    `;
+                });
+                wrongList.innerHTML = html;
+            }
+            wrongBook.style.display = "block";
+        }
+
+        // 隐藏错题本
+        function hideWrongBook() {
+            document.getElementById("wrongBook").style.display = "none";
+            document.getElementById("endPage").style.display = "block";
+        }
+    </script>
+</body>
+</html>

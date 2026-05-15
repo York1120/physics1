@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光的反射与折射定律示意图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #2d3436;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .physics-laws {
+            background: #e7f5ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #339af0;
+        }
+
+        .physics-laws h2 {
+            color: #1864ab;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .law-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 3px solid #74c0fc;
+        }
+
+        .law-title {
+            font-weight: bold;
+            color: #1971c2;
+            margin-bottom: 5px;
+        }
+
+        .simulation-area {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(to bottom, #ffffff 0%, #ffffff 50%, #a5d8ff 50%, #74c0fc 100%);
+            border: 3px solid #339af0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        /* 水面线 */
+        .water-surface {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #1864ab;
+            z-index: 1;
+        }
+
+        .water-surface::before {
+            content: '水面';
+            position: absolute;
+            left: 10px;
+            top: -25px;
+            background: #1864ab;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* 法线 */
+        .normal-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent 10px,
+                #666 10px,
+                #666 20px
+            );
+            z-index: 1;
+        }
+
+        .normal-line::before {
+            content: '法线';
+            position: absolute;
+            top: 10px;
+            left: 5px;
+            background: #666;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .normal-line::after {
+            content: 'O';
+            position: absolute;
+            top: 50%;
+            left: -8px;
+            width: 16px;
+            height: 16px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        /* 垂直符号 - L形线条 */
+        .perpendicular-symbol {
+            position: absolute;
+            top: 225px; /* 法线中心点上方20像素 */
+            left: 50%; /* 从法线中心开始 */
+            width: 20px;
+            height: 20px;
+            z-index: 3;
+        }
+
+        .perpendicular-symbol::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 20px; /* 向右20像素横线 */
+            height: 2px;
+            background: #4dabf7;
+        }
+
+        .perpendicular-symbol::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px; /* 从横线末端开始 */
+            width: 2px;
+            height: 20px; /* 向下20像素竖线 */
+            background: #4dabf7;
+        }
+
+        /* 光线样式 */
+        .light-ray {
+            position: absolute;
+            transform-origin: 50% 50%;
+            z-index: 2;
+        }
+
+        .incident-ray {
+            stroke: #ff6b6b;
+            stroke-width: 3;
+            marker-mid: url(#arrowhead-red);
+        }
+
+        .reflected-ray {
+            stroke: #ff922b;
+            stroke-width: 3;
+            marker-mid: url(#arrowhead-orange);
+        }
+
+        .refracted-ray {
+            stroke: #51cf66;
+            stroke-width: 3;
+            marker-mid: url(#arrowhead-green);
+        }
+
+        /* 角度弧线样式 */
+        .angle-arc {
+            fill: none;
+            stroke-width: 2;
+            stroke-dasharray: 5, 3;
+        }
+
+        .incident-arc {
+            stroke: #ff6b6b;
+        }
+
+        .reflected-arc {
+            stroke: #ff922b;
+        }
+
+        .refracted-arc {
+            stroke: #51cf66;
+        }
+
+        /* 角度标注 */
+        .angle-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            z-index: 3;
+        }
+
+        .incident-angle {
+            color: #ff6b6b;
+        }
+
+        .reflected-angle {
+            color: #ff922b;
+        }
+
+        .refracted-angle {
+            color: #51cf66;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: #dee2e6;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #339af0;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .value-display {
+            min-width: 60px;
+            text-align: center;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+        }
+
+        .medium-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .medium-option {
+            flex: 1;
+            padding: 10px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .medium-option.active {
+            background: #339af0;
+            color: white;
+            border-color: #1971c2;
+        }
+
+        .medium-option:hover {
+            border-color: #339af0;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+            font-size: 14px;
+        }
+
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .drag-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            cursor: move;
+            z-index: 10;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 光的反射与折射定律示意图</h1>
+
+        <div class="simulation-area" id="simulationArea">
+            <!-- 水面 -->
+            <div class="water-surface"></div>
+            
+            <!-- 法线 -->
+            <div class="normal-line">
+                <div class="perpendicular-symbol"></div>
+            </div>
+            
+            <!-- 光线将通过SVG动态绘制 -->
+            <svg width="100%" height="100%" id="lightRays">
+                <defs>
+                    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#ff6b6b"/>
+                    </marker>
+                    <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#ff922b"/>
+                    </marker>
+                    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#51cf66"/>
+                    </marker>
+                </defs>
+            </svg>
+            
+            <!-- 角度标注 -->
+            <div class="angle-label incident-angle" id="incidentAngleLabel">∠i = 45°</div>
+            <div class="angle-label reflected-angle" id="reflectedAngleLabel">∠r = 45°</div>
+            <div class="angle-label refracted-angle" id="refractedAngleLabel">∠r' = 32°</div>
+            
+            <!-- 拖动控制点 -->
+            <div class="drag-handle" id="dragHandle"></div>
+        </div>
+
+        <div class="control-panel">
+            <div class="control-group">
+                <label>入射角调节：</label>
+                <div class="slider-container">
+                    <input type="range" id="angleSlider" min="10" max="80" value="45" step="1">
+                    <div class="value-display" id="angleValue">45°</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>介质折射率：</label>
+                <div class="medium-selector">
+                    <div class="medium-option active" data-n="1.33">水 (n=1.33)</div>
+                    <div class="medium-option" data-n="1.5">玻璃 (n=1.5)</div>
+                    <div class="medium-option" data-n="2.42">钻石 (n=2.42)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="physics-laws">
+            <h2>📚 物理定律</h2>
+            <div class="law-item">
+                <div class="law-title">反射定律</div>
+                <div>（1）反射光线、入射光线和法线在同一平面内</div>
+                <div>（2）反射光线和入射光线分别位于法线两侧</div>
+                <div>（3）反射角等于入射角</div>
+            </div>
+            <div class="law-item">
+                <div class="law-title">折射定律</div>
+                <div>（1）折射光线、入射光线和法线在同一平面内</div>
+                <div>（2）折射光线和入射光线分别位于法线两侧</div>
+                <div>（3）当光从空气斜射入水中或玻璃中时，折射光线向法线方向偏折，折射角小于入射角</div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>💡 使用说明</h3>
+            <p>• 拖动红色圆点或使用滑块改变入射角</p>
+            <p>• 观察反射光线（橙色）和折射光线（绿色）的变化</p>
+            <p>• 选择不同介质查看折射率对光线偏折的影响</p>
+            <p>• 验证反射定律：入射角 = 反射角</p>
+            <p>• 验证折射定律：n₁·sin∠i = n₂·sin∠r</p>
+        </div>
+    </div>
+
+    <script>
+        // 物理常数
+        const AIR_REFRACTIVE_INDEX = 1.0; // 空气折射率
+        let currentRefractiveIndex = 1.33; // 当前介质折射率（水）
+        
+        // 获取DOM元素
+        const simulationArea = document.getElementById('simulationArea');
+        const lightRays = document.getElementById('lightRays');
+        const dragHandle = document.getElementById('dragHandle');
+        const angleSlider = document.getElementById('angleSlider');
+        const angleValue = document.getElementById('angleValue');
+        const incidentAngleLabel = document.getElementById('incidentAngleLabel');
+        const reflectedAngleLabel = document.getElementById('reflectedAngleLabel');
+        const refractedAngleLabel = document.getElementById('refractedAngleLabel');
+        
+        // 模拟区域尺寸
+        const areaWidth = simulationArea.offsetWidth;
+        const areaHeight = simulationArea.offsetHeight;
+        const centerX = areaWidth / 2;
+        const centerY = areaHeight / 2;
+        
+        // 初始入射角（度）
+        let incidentAngle = 45;
+        
+        // 初始化拖动控制点位置
+        function initDragHandle() {
+            const handleDistance = 150; // 控制点距离O点的距离
+            const angleRad = Math.abs(incidentAngle) * Math.PI / 180;
+            
+            // 根据入射角的正负决定控制点位置
+            let handleX, handleY;
+            if (incidentAngle >= 0) {
+                // 从左上方入射
+                handleX = centerX - handleDistance * Math.sin(angleRad);
+                handleY = centerY - handleDistance * Math.cos(angleRad);
+            } else {
+                // 从右上方入射
+                handleX = centerX + handleDistance * Math.sin(angleRad);
+                handleY = centerY - handleDistance * Math.cos(angleRad);
+            }
+            
+            dragHandle.style.left = handleX - 10 + 'px';
+            dragHandle.style.top = handleY - 10 + 'px';
+        }
+        
+        // 计算光线路径
+        function calculateLightPaths() {
+            const angleRad = Math.abs(incidentAngle) * Math.PI / 180;
+            const angleSign = Math.sign(incidentAngle);
+            
+            // 入射光线（从控制点到O点）
+            const incidentLength = 200;
+            const incidentStartX = centerX - angleSign * incidentLength * Math.sin(angleRad);
+            const incidentStartY = centerY - incidentLength * Math.cos(angleRad);
+            
+            // 反射光线（根据反射定律：入射角 = 反射角）
+            const reflectedLength = 200;
+            const reflectedEndX = centerX + angleSign * reflectedLength * Math.sin(angleRad);
+            const reflectedEndY = centerY - reflectedLength * Math.cos(angleRad);
+            
+            // 折射光线（根据斯涅尔定律）
+            const sinRefracted = (AIR_REFRACTIVE_INDEX / currentRefractiveIndex) * Math.sin(angleRad);
+            const refractedAngleRad = Math.asin(sinRefracted);
+            const refractedLength = 200;
+            const refractedEndX = centerX + angleSign * refractedLength * Math.sin(refractedAngleRad);
+            const refractedEndY = centerY + refractedLength * Math.cos(refractedAngleRad);
+            
+            // 更新角度标注（不显示实际度数）
+            incidentAngleLabel.textContent = "∠i";
+            reflectedAngleLabel.textContent = "∠r";
+            refractedAngleLabel.textContent = "∠r'";
+            
+            // 定位角度标注（与弧线对齐）
+            const arcRadius = 40;
+            const labelOffset = 20;
+            
+            // 入射角标注位置（弧线中点）
+            const incidentLabelAngle = -Math.PI / 2 - angleSign * angleRad / 2;
+            incidentAngleLabel.style.left = (centerX + arcRadius * Math.cos(incidentLabelAngle) - labelOffset) + 'px';
+            incidentAngleLabel.style.top = (centerY + arcRadius * Math.sin(incidentLabelAngle) - labelOffset) + 'px';
+            
+            // 反射角标注位置（弧线中点）
+            const reflectedLabelAngle = -Math.PI / 2 + angleSign * angleRad / 2;
+            reflectedAngleLabel.style.left = (centerX + arcRadius * Math.cos(reflectedLabelAngle) + labelOffset) + 'px';
+            reflectedAngleLabel.style.top = (centerY + arcRadius * Math.sin(reflectedLabelAngle) - labelOffset) + 'px';
+            
+            // 折射角标注位置（弧线中点）
+            const refractedLabelAngle = Math.PI / 2 + angleSign * refractedAngleRad / 2;
+            refractedAngleLabel.style.left = (centerX + arcRadius * Math.cos(refractedLabelAngle) + labelOffset) + 'px';
+            refractedAngleLabel.style.top = (centerY + arcRadius * Math.sin(refractedLabelAngle) + labelOffset) + 'px';
+            
+            return {
+                incident: { startX: incidentStartX, startY: incidentStartY, endX: centerX, endY: centerY },
+                reflected: { startX: centerX, startY: centerY, endX: reflectedEndX, endY: reflectedEndY },
+                refracted: { startX: centerX, startY: centerY, endX: refractedEndX, endY: refractedEndY }
+            };
+        }
+        
+        // 绘制光线和角度弧线
+        function drawLightRays() {
+            const paths = calculateLightPaths();
+            const angleRad = incidentAngle * Math.PI / 180;
+            const refractedAngleRad = Math.asin((AIR_REFRACTIVE_INDEX / currentRefractiveIndex) * Math.sin(angleRad));
+            
+            // 清空之前的绘制
+            lightRays.innerHTML = `
+                <defs>
+                    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#ff6b6b"/>
+                    </marker>
+                    <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#ff922b"/>
+                    </marker>
+                    <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#51cf66"/>
+                    </marker>
+                </defs>
+            `;
+            
+            // 绘制入射光线（折线，箭头在中段）
+            const incidentMidX = (paths.incident.startX + paths.incident.endX) / 2;
+            const incidentMidY = (paths.incident.startY + paths.incident.endY) / 2;
+            const incidentPolyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            incidentPolyline.setAttribute("points", `${paths.incident.startX},${paths.incident.startY} ${incidentMidX},${incidentMidY} ${paths.incident.endX},${paths.incident.endY}`);
+            incidentPolyline.setAttribute("class", "light-ray incident-ray");
+            incidentPolyline.setAttribute("fill", "none");
+            lightRays.appendChild(incidentPolyline);
+            
+            // 绘制反射光线（折线，箭头在中段）
+            const reflectedMidX = (paths.reflected.startX + paths.reflected.endX) / 2;
+            const reflectedMidY = (paths.reflected.startY + paths.reflected.endY) / 2;
+            const reflectedPolyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            reflectedPolyline.setAttribute("points", `${paths.reflected.startX},${paths.reflected.startY} ${reflectedMidX},${reflectedMidY} ${paths.reflected.endX},${paths.reflected.endY}`);
+            reflectedPolyline.setAttribute("class", "light-ray reflected-ray");
+            reflectedPolyline.setAttribute("fill", "none");
+            lightRays.appendChild(reflectedPolyline);
+            
+            // 绘制折射光线（折线，箭头在中段）
+            const refractedMidX = (paths.refracted.startX + paths.refracted.endX) / 2;
+            const refractedMidY = (paths.refracted.startY + paths.refracted.endY) / 2;
+            const refractedPolyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            refractedPolyline.setAttribute("points", `${paths.refracted.startX},${paths.refracted.startY} ${refractedMidX},${refractedMidY} ${paths.refracted.endX},${paths.refracted.endY}`);
+            refractedPolyline.setAttribute("class", "light-ray refracted-ray");
+            refractedPolyline.setAttribute("fill", "none");
+            lightRays.appendChild(refractedPolyline);
+            
+            // 绘制角度弧线
+            const arcRadius = 40; // 弧线半径
+            
+            // 入射角弧线（从法线到入射光线，圆心在交点处）
+            const incidentArc = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const angleSign = Math.sign(incidentAngle);
+            incidentArc.setAttribute("d", describeIncidentArc(centerX, centerY, arcRadius, Math.abs(angleRad), angleSign));
+            incidentArc.setAttribute("class", "angle-arc incident-arc");
+            lightRays.appendChild(incidentArc);
+            
+            // 反射角弧线（从法线到反射光线，圆心在交点处）
+            const reflectedArc = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            reflectedArc.setAttribute("d", describeReflectedArc(centerX, centerY, arcRadius, Math.abs(angleRad), angleSign));
+            reflectedArc.setAttribute("class", "angle-arc reflected-arc");
+            lightRays.appendChild(reflectedArc);
+            
+            // 折射角弧线（从法线到折射光线，位于折射光线和法线之间，圆心在交点处）
+            const refractedArc = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            refractedArc.setAttribute("d", describeRefractedArc(centerX, centerY, arcRadius, refractedAngleRad, angleSign));
+            refractedArc.setAttribute("class", "angle-arc refracted-arc");
+            lightRays.appendChild(refractedArc);
+        }
+        
+        // 描述入射角弧线的辅助函数（根据光线方向正确显示弧线形状）
+        function describeIncidentArc(x, y, radius, angleRad, angleSign) {
+            const startAngle = -Math.PI / 2; // 法线方向（向上）
+            const endAngle = startAngle - angleSign * angleRad; // 延伸到入射光线
+            const startX = x + radius * Math.cos(startAngle);
+            const startY = y + radius * Math.sin(startAngle);
+            const endX = x + radius * Math.cos(endAngle);
+            const endY = y + radius * Math.sin(endAngle);
+            
+            // 根据角度方向确定弧线方向（向内凹或向外凸）
+            const sweepFlag = angleSign >= 0 ? "0" : "1"; // 正角度向外凸，负角度向内凹
+            const largeArcFlag = Math.abs(endAngle - startAngle) <= Math.PI ? "0" : "1";
+            
+            return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+        }
+        
+        // 描述反射角弧线的辅助函数（根据光线方向正确显示弧线形状）
+        function describeReflectedArc(x, y, radius, angleRad, angleSign) {
+            const startAngle = -Math.PI / 2; // 法线方向（向上）
+            const endAngle = startAngle + angleSign * angleRad; // 延伸到反射光线
+            const startX = x + radius * Math.cos(startAngle);
+            const startY = y + radius * Math.sin(startAngle);
+            const endX = x + radius * Math.cos(endAngle);
+            const endY = y + radius * Math.sin(endAngle);
+            
+            // 根据角度方向确定弧线方向（向内凹或向外凸）
+            const sweepFlag = angleSign >= 0 ? "1" : "0"; // 正角度向内凹，负角度向外凸
+            const largeArcFlag = Math.abs(endAngle - startAngle) <= Math.PI ? "0" : "1";
+            
+            return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+        }
+        
+        // 描述折射角弧线的辅助函数（根据光线方向正确显示弧线形状）
+        function describeRefractedArc(x, y, radius, refractedAngleRad, angleSign) {
+            // 根据折射光线的方向确定弧线的起始和结束角度
+            let startAngle, endAngle;
+            
+            if (angleSign >= 0) {
+                // 折射光线在法线右侧（正角度）
+                startAngle = Math.PI / 2; // 法线方向（向下）
+                endAngle = startAngle - angleSign * refractedAngleRad; // 延伸到折射光线
+            } else {
+                // 折射光线在法线左侧（负角度）
+                startAngle = Math.PI / 2; // 法线方向（向下）
+                endAngle = startAngle + angleSign * refractedAngleRad; // 延伸到折射光线
+            }
+            
+            const startX = x + radius * Math.cos(startAngle);
+            const startY = y + radius * Math.sin(startAngle);
+            const endX = x + radius * Math.cos(endAngle);
+            const endY = y + radius * Math.sin(endAngle);
+            
+            // 根据角度方向确定弧线方向（向内凹或向外凸）
+            const sweepFlag = angleSign >= 0 ? "0" : "1"; // 正角度向外凸，负角度向内凹
+            const largeArcFlag = Math.abs(endAngle - startAngle) <= Math.PI ? "0" : "1";
+            
+            return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+        }
+        
+        // 拖动事件处理
+        let isDragging = false;
+        
+        dragHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const rect = simulationArea.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // 限制在合理范围内
+            const handleX = Math.max(50, Math.min(areaWidth - 50, mouseX));
+            const handleY = Math.max(50, Math.min(areaHeight - 50, mouseY));
+            
+            // 计算入射角（支持从右上方入射）
+            const dx = centerX - handleX;
+            const dy = centerY - handleY;
+            incidentAngle = Math.atan2(dx, dy) * 180 / Math.PI;
+            
+            // 支持从右上方入射（负角度）和0度入射
+            // 限制入射角在合理范围内（-80°到80°，包括0°）
+            incidentAngle = Math.max(-80, Math.min(80, incidentAngle));
+            
+            // 更新滑块和显示
+            angleSlider.value = Math.round(Math.abs(incidentAngle));
+            angleValue.textContent = Math.round(Math.abs(incidentAngle)) + '°';
+            
+            // 更新控制点位置
+            dragHandle.style.left = handleX - 10 + 'px';
+            dragHandle.style.top = handleY - 10 + 'px';
+            
+            // 重绘光线
+            drawLightRays();
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        // 滑块事件处理
+        angleSlider.addEventListener('input', () => {
+            // 滑块只控制角度大小，方向由拖动位置决定
+            const angleValue = parseInt(angleSlider.value);
+            
+            // 保持当前角度的正负号，只更新角度大小
+            if (incidentAngle >= 0) {
+                incidentAngle = angleValue;
+            } else {
+                incidentAngle = -angleValue;
+            }
+            
+            document.getElementById('angleValue').textContent = angleValue + '°';
+            
+            // 更新控制点位置
+            initDragHandle();
+            
+            // 重绘光线
+            drawLightRays();
+        });
+        
+        // 介质选择事件
+        document.querySelectorAll('.medium-option').forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除所有active类
+                document.querySelectorAll('.medium-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                
+                // 添加active类到当前选项
+                option.classList.add('active');
+                
+                // 更新折射率
+                currentRefractiveIndex = parseFloat(option.dataset.n);
+                
+                // 更新界面标签文字
+                updateMediumLabel();
+                
+                // 重绘光线
+                drawLightRays();
+            });
+        });
+        
+        // 更新介质标签文字
+        function updateMediumLabel() {
+            const waterSurface = document.querySelector('.water-surface');
+            let labelText = '水面'; // 默认文字
+            
+            // 根据当前折射率确定介质类型
+            if (currentRefractiveIndex === 1.5) {
+                labelText = '玻璃';
+            } else if (currentRefractiveIndex === 2.42) {
+                labelText = '钻石';
+            }
+            
+            // 更新伪元素内容
+            const style = document.createElement('style');
+            style.textContent = `.water-surface::before { content: '${labelText}'; }`;
+            
+            // 移除旧的样式
+            const oldStyle = document.getElementById('medium-label-style');
+            if (oldStyle) {
+                oldStyle.remove();
+            }
+            
+            style.id = 'medium-label-style';
+            document.head.appendChild(style);
+        }
+        
+        // 窗口大小变化时重新计算
+        window.addEventListener('resize', () => {
+            // 在实际应用中可能需要重新计算尺寸
+            // 这里简化处理，直接重绘
+            drawLightRays();
+        });
+        
+        // 初始化
+        initDragHandle();
+        updateMediumLabel(); // 初始化介质标签
+        drawLightRays();
+    </script>
+</body>
+</html>
