@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>York周老师物理</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 40px 20px 30px;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f7971e, #ffd200);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      letter-spacing: 4px;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+      margin-top: 10px;
+      letter-spacing: 2px;
+    }
+
+    .header .badge {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      color: #ffd700;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent, #4fc3f7), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent, #4fc3f7);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.5;
+    }
+
+    .card-number {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.2);
+      font-weight: 700;
+    }
+
+    /* Card accent colors */
+    .card:nth-child(1) { --accent: #ff6b6b; }
+    .card:nth-child(2) { --accent: #4fc3f7; }
+    .card:nth-child(3) { --accent: #81c784; }
+    .card:nth-child(4) { --accent: #ffb74d; }
+    .card:nth-child(5) { --accent: #ba68c8; }
+    .card:nth-child(6) { --accent: #4dd0e1; }
+    .card:nth-child(7) { --accent: #f06292; }
+    .card:nth-child(8) { --accent: #aed581; }
+    .card:nth-child(9) { --accent: #ff8a65; }
+    .card:nth-child(10) { --accent: #7986cb; }
+    .card:nth-child(11) { --accent: #4db6ac; }
+    .card:nth-child(12) { --accent: #9575cd; }
+    .card:nth-child(13) { --accent: #4fc3f7; }
+    .card:nth-child(14) { --accent: #ffd54f; }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.85rem;
+      padding-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 2rem; }
+      .grid { grid-template-columns: 1fr; }
+      .card { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📐 York 周老师物理</h1>
+    <p>初中物理互动教学平台</p>
+    <div class="badge">✨ 点击卡片进入对应实验</div>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="01-length.html">
+      <span class="card-number">01</span>
+      <span class="card-icon">📏</span>
+      <div class="card-title">长度读取训练平台</div>
+      <div class="card-desc">练习刻度尺读数，支持厘米/毫米单位切换，随机出题</div>
+      <div class="tags">
+        <span class="tag">机械运动</span>
+        <span class="tag">测量</span>
+      </div>
+    </a>
+
+    <a class="card" href="02-frequency.html">
+      <span class="card-number">02</span>
+      <span class="card-icon">🎵</span>
+      <div class="card-title">频率发声器</div>
+      <div class="card-desc">调节频率与振幅，实时波形显示，预设频率快速切换</div>
+      <div class="tags">
+        <span class="tag">声现象</span>
+        <span class="tag">波形</span>
+      </div>
+    </a>
+
+    <a class="card" href="03-noise.html">
+      <span class="card-number">03</span>
+      <span class="card-icon">📢</span>
+      <div class="card-title">噪声检测仪</div>
+      <div class="card-desc">使用麦克风实时检测环境噪声分贝值，波形可视化</div>
+      <div class="tags">
+        <span class="tag">声现象</span>
+        <span class="tag">噪声</span>
+      </div>
+    </a>
+
+    <a class="card" href="04-pinhole.html">
+      <span class="card-number">04</span>
+      <span class="card-icon">🔦</span>
+      <div class="card-title">小孔成像虚拟实验</div>
+      <div class="card-desc">拖拽物体与光屏，观察倒立实像，支持触摸屏</div>
+      <div class="tags">
+        <span class="tag">光的传播</span>
+        <span class="tag">成像</span>
+      </div>
+    </a>
+
+    <a class="card" href="05-reflection.html">
+      <span class="card-number">05</span>
+      <span class="card-icon">🪞</span>
+      <div class="card-title">光的反射与折射模拟器</div>
+      <div class="card-desc">拖拽入射光线，动态显示反射与折射，调节折射率</div>
+      <div class="tags">
+        <span class="tag">反射</span>
+        <span class="tag">折射</span>
+      </div>
+    </a>
+
+    <a class="card" href="06-rgb.html">
+      <span class="card-number">06</span>
+      <span class="card-icon">🌈</span>
+      <div class="card-title">光的三原色组合游戏</div>
+      <div class="card-desc">调节RGB三色光强度，观察色光混合效果</div>
+      <div class="tags">
+        <span class="tag">色光</span>
+        <span class="tag">视觉</span>
+      </div>
+    </a>
+
+    <a class="card" href="07-lens.html">
+      <span class="card-number">07</span>
+      <span class="card-icon">🔍</span>
+      <div class="card-title">凸透镜成像虚拟实验</div>
+      <div class="card-desc">拖拽蜡烛/透镜/光屏，实时显示成像规律与光路</div>
+      <div class="tags">
+        <span class="tag">透镜</span>
+        <span class="tag">成像</span>
+      </div>
+    </a>
+
+    <a class="card" href="08-molecule.html">
+      <span class="card-number">08</span>
+      <span class="card-icon">⚛️</span>
+      <div class="card-title">分子热运动微观示意图</div>
+      <div class="card-desc">固液气三态分子动画，温度滑块调节运动速度</div>
+      <div class="tags">
+        <span class="tag">热运动</span>
+        <span class="tag">分子</span>
+      </div>
+    </a>
+
+    <a class="card" href="09-engine.html">
+      <span class="card-number">09</span>
+      <span class="card-icon">🔧</span>
+      <div class="card-title">四冲程汽油机示意图</div>
+      <div class="card-desc">四冲程动画演示，可调速，显示进气/压缩/做功/排气</div>
+      <div class="tags">
+        <span class="tag">热机</span>
+        <span class="tag">内能</span>
+      </div>
+    </a>
+
+    <a class="card" href="10-refraction.html">
+      <span class="card-number">10</span>
+      <span class="card-icon">🌊</span>
+      <div class="card-title">光的反射与折射定律</div>
+      <div class="card-desc">斯涅尔定律验证，水/玻璃/钻石介质切换，可拖动</div>
+      <div class="tags">
+        <span class="tag">反射定律</span>
+        <span class="tag">折射定律</span>
+      </div>
+    </a>
+
+    <a class="card" href="11-review.html">
+      <span class="card-number">11</span>
+      <span class="card-icon">📝</span>
+      <div class="card-title">初中物理知识点复习</div>
+      <div class="card-desc">机械运动·声现象·物态变化，100道选择题，进度统计</div>
+      <div class="tags">
+        <span class="tag">复习</span>
+        <span class="tag">练习</span>
+        <span class="tag">八上</span>
+      </div>
+    </a>
+
+    <a class="card" href="12-buoyancy.html">
+      <span class="card-number">12</span>
+      <span class="card-icon">🪵</span>
+      <div class="card-title">木块浮力图像</div>
+      <div class="card-desc">水深调节模拟，浮力四阶段变化曲线，实时水箱动画</div>
+      <div class="tags">
+        <span class="tag">浮力</span>
+        <span class="tag">图像</span>
+      </div>
+    </a>
+
+    <a class="card" href="13-torricelli.html">
+      <span class="card-number">13</span>
+      <span class="card-icon">🧪</span>
+      <div class="card-title">托里拆利实验</div>
+      <div class="card-desc">水银/水切换，倾斜角度与海拔调节，测量大气压</div>
+      <div class="tags">
+        <span class="tag">大气压</span>
+        <span class="tag">压强</span>
+      </div>
+    </a>
+
+    <a class="card" href="14-quiz.html">
+      <span class="card-number">14</span>
+      <span class="card-icon">🎯</span>
+      <div class="card-title">《物理原来很有趣》测验</div>
+      <div class="card-desc">随机5题，错题本，对应物理学家与定律匹配</div>
+      <div class="tags">
+        <span class="tag">科普</span>
+        <span class="tag">测验</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="footer">
+    York 周老师物理 · 初中物理互动教学平台
+  </div>
+</body>
+</html>
