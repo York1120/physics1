@@ -1,621 +1,641 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 基础图标 -->
-    <link rel="icon" href="/images/logo.ico" type="image/x-icon">
-    <!-- 兼容微信/手机端的高清图标 -->
-    <link rel="icon" href="/images/logo.png" type="image/png" sizes="32x32">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小孔成像虚拟实验平台 - 初中物理教学</title>
-    <style>
-        /* 页面基本样式 */
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        /* 标题样式 */
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        /* 实验区域容器 */
-        .experiment-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        
-        /* 画布样式 */
-        #experimentCanvas {
-            border: 2px solid #3498db;
-            border-radius: 5px;
-            background-color: #ecf0f1;
-            cursor: pointer;
-        }
-        
-        /* 控制面板样式 */
-        .control-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .control-group {
-            margin-bottom: 15px;
-        }
-        
-        .control-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .control-group input[type="range"] {
-            width: 100%;
-        }
-        
-        /* 物理原理说明 */
-        .physics-explanation {
-            background: #e8f4f8;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-        
-        .physics-explanation h3 {
-            color: #2980b9;
-            margin-top: 0;
-        }
-        
-        /* 操作说明 */
-        .instructions {
-            background: #fff8e1;
-            border-left: 4px solid #f39c12;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-        
-        .instructions h3 {
-            color: #d35400;
-            margin-top: 0;
-        }
-    </style>
+ <!-- 基础图标 -->
+ <link rel="icon" href="/images/logo.ico" type="image/x-icon">
+ <!-- 兼容微信/手机端的高清图标 -->
+ <link rel="icon" href="/images/logo.png" type="image/png" sizes="32x32">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>York 周老师物理：小孔成像虚拟实验平台 - 初中物理教学</title>
+ <style>
+ /* 页面基本样式 */
+ body {
+ font-family: 'Microsoft YaHei', Arial, sans-serif;
+ margin: 0;
+ padding: 20px;
+ background-color: #f5f5f5;
+ }
+
+ /* 标题样式 */
+ .header {
+ text-align: center;
+ margin-bottom: 20px;
+ color: #333;
+ }
+
+ .header h1 {
+ color: #2c3e50;
+ margin-bottom: 10px;
+ }
+
+ /* 实验区域容器 */
+ .experiment-container {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ background: white;
+ border-radius: 10px;
+ padding: 20px;
+ box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+ margin-bottom: 20px;
+ }
+
+ /* 画布样式 */
+ #experimentCanvas {
+ border: 2px solid #3498db;
+ border-radius: 5px;
+ background-color: #ecf0f1;
+ cursor: pointer;
+ }
+
+ /* 控制面板样式 */
+ .control-panel {
+ background: white;
+ border-radius: 10px;
+ padding: 20px;
+ box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+ }
+
+ .control-group {
+ margin-bottom: 15px;
+ }
+
+ .control-group label {
+ display: block;
+ margin-bottom: 5px;
+ font-weight: bold;
+ color: #2c3e50;
+ }
+
+ .control-group input[type="range"] {
+ width: 100%;
+ }
+
+ /* 物理原理说明 */
+ .physics-explanation {
+ background: #e8f4f8;
+ border-left: 4px solid #3498db;
+ padding: 15px;
+ margin-top: 20px;
+ border-radius: 5px;
+ }
+
+ .physics-explanation h3 {
+ color: #2980b9;
+ margin-top: 0;
+ }
+
+ /* 操作说明 */
+ .instructions {
+ background: #fff8e1;
+ border-left: 4px solid #f39c12;
+ padding: 15px;
+ margin-top: 20px;
+ border-radius: 5px;
+ }
+
+ .instructions h3 {
+ color: #d35400;
+ margin-top: 0;
+ }
+ .home-btn {
+ position: fixed;
+ top: 12px;
+ left: 12px;
+ z-index: 9999;
+ background: rgba(0,0,0,0.55);
+ color: #fff;
+ padding: 6px 14px;
+ border-radius: 6px;
+ text-decoration: none;
+ font-size: 14px;
+ font-weight: bold;
+ backdrop-filter: blur(4px);
+ border: 1px solid rgba(255,255,255,0.15);
+ transition: background 0.2s;
+ }
+ .home-btn:hover {
+ background: rgba(0,0,0,0.75);
+ }
+ </style>
 </head>
 <body>
-    <div class="header">
-        <h1>小孔成像虚拟实验平台</h1>
-        <p>初中物理教学专用 - 探索光的直线传播原理</p>
-    </div>
-    
-    <div class="experiment-container">
-        <canvas id="experimentCanvas" width="800" height="400"></canvas>
-    </div>
-    
-    <div class="control-panel">
-        <div class="control-group">
-            <label for="objectDistance">物体到小孔的距离: <span id="objectDistanceValue">200</span> 像素</label>
-            <input type="range" id="objectDistance" min="50" max="350" value="200" step="1">
-        </div>
-        
-        <div class="control-group">
-            <label for="screenDistance">光屏到小孔的距离: <span id="screenDistanceValue">200</span> 像素</label>
-            <input type="range" id="screenDistance" min="50" max="350" value="200" step="1">
-        </div>
-        
-        <div class="control-group">
-            <label for="objectHeight">物体高度: <span id="objectHeightValue">100</span> 像素</label>
-            <input type="range" id="objectHeight" min="20" max="150" value="100" step="1">
-        </div>
-        
-        <button id="resetButton" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">重置实验</button>
-    </div>
-    
-    <div class="physics-explanation">
-        <h3>物理原理说明</h3>
-        <p><strong>小孔成像原理：</strong>光在均匀介质中沿直线传播。物体发出的光线通过小孔后，会在光屏上形成倒立的实像。</p>
-        <p><strong>成像规律：</strong></p>
-        <ul>
-            <li>像的大小与物体到小孔的距离成反比</li>
-            <li>像的倒立性质证明了光的直线传播特性</li>
-            <li>像的清晰度与小孔的大小有关（小孔越小，像越清晰）</li>
-        </ul>
-    </div>
-    
-    <div class="instructions">
-        <h3>操作说明</h3>
-        <ul>
-            <li>使用滑块调整物体和光屏的位置</li>
-            <li>在画布上直接拖拽物体或光屏来改变位置</li>
-            <li>观察光线传播路径和成像效果</li>
-            <li>点击"重置实验"按钮恢复初始状态</li>
-        </ul>
-    </div>
+ <a href="index.html" class="home-btn">🏠 首页</a>
+ <div class="header">
+ <h1>📐 York 周老师物理：小孔成像虚拟实验平台</h1>
+ <p>初中物理教学专用 - 探索光的直线传播原理</p>
+ </div>
 
-    <script>
-        // 获取Canvas元素和上下文
-        const canvas = document.getElementById('experimentCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // 实验参数 - 这些变量控制实验的各个部分
-        let objectDistance = 200;  // 物体到小孔的距离（像素）
-        let screenDistance = 200;  // 光屏到小孔的距离（像素）
-        let objectHeight = 100;     // 物体高度（像素）
-        const holeWidth = 10;       // 小孔宽度（固定值）
-        const canvasWidth = 800;    // 画布宽度
-        const canvasHeight = 400;   // 画布高度
-        const holeX = canvasWidth / 2;  // 小孔在画布中心的x坐标
-        
-        // 拖拽相关变量
-        let isDragging = false;
-        let dragTarget = null; // 'object' 或 'screen'
-        let dragOffsetX = 0;
-        
-        // 初始化实验
-        function initExperiment() {
-            // 设置滑块事件监听
-            document.getElementById('objectDistance').addEventListener('input', updateObjectDistance);
-            document.getElementById('screenDistance').addEventListener('input', updateScreenDistance);
-            document.getElementById('objectHeight').addEventListener('input', updateObjectHeight);
-            document.getElementById('resetButton').addEventListener('click', resetExperiment);
-            
-            // 设置画布拖拽事件 - 同时支持鼠标和触摸
-            canvas.addEventListener('mousedown', startDrag);
-            canvas.addEventListener('mousemove', drag);
-            canvas.addEventListener('mouseup', endDrag);
-            canvas.addEventListener('mouseleave', endDrag);
-            
-            // 添加触摸事件支持（用于希沃平台等触摸屏设备）
-            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-            canvas.addEventListener('touchend', handleTouchEnd);
-            canvas.addEventListener('touchcancel', handleTouchEnd);
-            
-            // 初始绘制
-            drawExperiment();
-        }
-        
-        // 更新物体距离
-        function updateObjectDistance(e) {
-            objectDistance = parseInt(e.target.value);
-            document.getElementById('objectDistanceValue').textContent = objectDistance;
-            drawExperiment();
-        }
-        
-        // 更新光屏距离
-        function updateScreenDistance(e) {
-            screenDistance = parseInt(e.target.value);
-            document.getElementById('screenDistanceValue').textContent = screenDistance;
-            drawExperiment();
-        }
-        
-        // 更新物体高度
-        function updateObjectHeight(e) {
-            objectHeight = parseInt(e.target.value);
-            document.getElementById('objectHeightValue').textContent = objectHeight;
-            drawExperiment();
-        }
-        
-        // 重置实验
-        function resetExperiment() {
-            objectDistance = 200;
-            screenDistance = 200;
-            objectHeight = 100;
-            
-            document.getElementById('objectDistance').value = objectDistance;
-            document.getElementById('screenDistance').value = screenDistance;
-            document.getElementById('objectHeight').value = objectHeight;
-            
-            document.getElementById('objectDistanceValue').textContent = objectDistance;
-            document.getElementById('screenDistanceValue').textContent = screenDistance;
-            document.getElementById('objectHeightValue').textContent = objectHeight;
-            
-            drawExperiment();
-        }
-        
-        // 开始拖拽
-        function startDrag(e) {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            
-            // 检查是否点击了物体
-            const objectX = holeX - objectDistance;
-            if (mouseX >= objectX - 20 && mouseX <= objectX + 20) {
-                isDragging = true;
-                dragTarget = 'object';
-                dragOffsetX = mouseX - objectX;
-            }
-            
-            // 检查是否点击了光屏
-            const screenX = holeX + screenDistance;
-            if (mouseX >= screenX - 20 && mouseX <= screenX + 20) {
-                isDragging = true;
-                dragTarget = 'screen';
-                dragOffsetX = mouseX - screenX;
-            }
-        }
-        
-        // 拖拽过程
-        function drag(e) {
-            if (!isDragging) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            
-            if (dragTarget === 'object') {
-                // 计算新的物体距离（限制在合理范围内）
-                const newObjectDistance = holeX - (mouseX - dragOffsetX);
-                if (newObjectDistance >= 50 && newObjectDistance <= 350) {
-                    objectDistance = newObjectDistance;
-                    document.getElementById('objectDistance').value = objectDistance;
-                    document.getElementById('objectDistanceValue').textContent = objectDistance;
-                }
-            } else if (dragTarget === 'screen') {
-                // 计算新的光屏距离（限制在合理范围内）
-                const newScreenDistance = (mouseX - dragOffsetX) - holeX;
-                if (newScreenDistance >= 50 && newScreenDistance <= 350) {
-                    screenDistance = newScreenDistance;
-                    document.getElementById('screenDistance').value = screenDistance;
-                    document.getElementById('screenDistanceValue').textContent = screenDistance;
-                }
-            }
-            
-            drawExperiment();
-        }
-        
-        // 结束拖拽
-        function endDrag() {
-            isDragging = false;
-            dragTarget = null;
-        }
-        
-        // 触摸开始事件处理
-        function handleTouchStart(e) {
-            e.preventDefault(); // 阻止默认行为（如页面滚动）
-            
-            // 获取第一个触摸点
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const touchX = touch.clientX - rect.left;
-            
-            // 检查是否触摸了物体
-            const objectX = holeX - objectDistance;
-            if (touchX >= objectX - 30 && touchX <= objectX + 30) { // 增大触摸区域
-                isDragging = true;
-                dragTarget = 'object';
-                dragOffsetX = touchX - objectX;
-            }
-            
-            // 检查是否触摸了光屏
-            const screenX = holeX + screenDistance;
-            if (touchX >= screenX - 30 && touchX <= screenX + 30) { // 增大触摸区域
-                isDragging = true;
-                dragTarget = 'screen';
-                dragOffsetX = touchX - screenX;
-            }
-        }
-        
-        // 触摸移动事件处理
-        function handleTouchMove(e) {
-            e.preventDefault(); // 阻止默认行为
-            
-            if (!isDragging) return;
-            
-            // 获取第一个触摸点
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const touchX = touch.clientX - rect.left;
-            
-            if (dragTarget === 'object') {
-                // 计算新的物体距离（限制在合理范围内）
-                const newObjectDistance = holeX - (touchX - dragOffsetX);
-                if (newObjectDistance >= 50 && newObjectDistance <= 350) {
-                    objectDistance = newObjectDistance;
-                    document.getElementById('objectDistance').value = objectDistance;
-                    document.getElementById('objectDistanceValue').textContent = objectDistance;
-                }
-            } else if (dragTarget === 'screen') {
-                // 计算新的光屏距离（限制在合理范围内）
-                const newScreenDistance = (touchX - dragOffsetX) - holeX;
-                if (newScreenDistance >= 50 && newScreenDistance <= 350) {
-                    screenDistance = newScreenDistance;
-                    document.getElementById('screenDistance').value = screenDistance;
-                    document.getElementById('screenDistanceValue').textContent = screenDistance;
-                }
-            }
-            
-            drawExperiment();
-        }
-        
-        // 触摸结束事件处理
-        function handleTouchEnd(e) {
-            e.preventDefault();
-            isDragging = false;
-            dragTarget = null;
-        }
-        
-        // 绘制整个实验
-        function drawExperiment() {
-            // 清空画布
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            
-            // 计算各个元素的位置
-            const objectX = holeX - objectDistance;  // 物体x坐标
-            const screenX = holeX + screenDistance; // 光屏x坐标
-            const centerY = canvasHeight / 2;       // 中心y坐标
-            
-            // 绘制背景网格（辅助线）
-            drawGrid();
-            
-            // 绘制物体（竖直线段）
-            drawObject(objectX, centerY, objectHeight);
-            
-            // 绘制小孔
-            drawHole(holeX, centerY);
-            
-            // 绘制光屏
-            drawScreen(screenX, centerY);
-            
-            // 计算并绘制成像
-            drawImage(objectX, centerY, objectHeight, holeX, screenX);
-            
-            // 绘制光线路径
-            drawLightRays(objectX, centerY, objectHeight, holeX, screenX);
-        }
-        
-        // 绘制背景网格
-        function drawGrid() {
-            ctx.strokeStyle = '#ddd';
-            ctx.lineWidth = 0.5;
-            
-            // 绘制水平网格线
-            for (let y = 0; y <= canvasHeight; y += 20) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvasWidth, y);
-                ctx.stroke();
-            }
-            
-            // 绘制垂直网格线
-            for (let x = 0; x <= canvasWidth; x += 20) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvasHeight);
-                ctx.stroke();
-            }
-        }
-        
-        // 绘制物体
-        function drawObject(x, centerY, height) {
-            const topY = centerY - height / 2;
-            const bottomY = centerY + height / 2;
-            
-            // 绘制物体线段（放大为原来的1.5倍）- 顶端10像素不显示，让箭头清晰可见
-            ctx.strokeStyle = '#e74c3c';
-            ctx.lineWidth = 13.5;  // 原来为9，现在放大为13.5（1.5倍）
-            ctx.beginPath();
-            ctx.moveTo(x, topY + 15);  // 从顶端下方15像素开始绘制（放大1.5倍）
-            ctx.lineTo(x, bottomY);
-            ctx.stroke();
-            
-            // 在物体顶端绘制朝上的箭头（三角形）- 箭头显示在线段上方
-            drawArrow(x, topY, 'up', '#e74c3c');
-            
-            // 添加标签
-            ctx.fillStyle = '#333';
-            ctx.font = '21px Arial';  // 字体放大为原来的1.5倍
-            ctx.fillText('物体', x - 22.5, centerY - height / 2 - 30);  // 位置调整（放大1.5倍）
-        }
-        
-        // 绘制小孔
-        function drawHole(x, centerY) {
-            const holeHeight = 120; // 小孔高度放大为原来的1.5倍（80 * 1.5 = 120）
-            const topY = centerY - holeHeight / 2;
-            const bottomY = centerY + holeHeight / 2;
-            
-            // 绘制小孔边框
-            ctx.strokeStyle = '#3498db';
-            ctx.lineWidth = 3;  // 边框宽度放大为原来的1.5倍
-            ctx.strokeRect(x - holeWidth / 2, topY, holeWidth, holeHeight);
-            
-            // 绘制小孔中心标记
-            ctx.fillStyle = '#3498db';
-            ctx.beginPath();
-            ctx.arc(x, centerY, 4.5, 0, Math.PI * 2);  // 中心标记放大为原来的1.5倍
-            ctx.fill();
-            
-            // 添加标签
-            ctx.fillStyle = '#333';
-            ctx.font = '21px Arial';  // 字体放大为原来的1.5倍
-            ctx.fillText('小孔', x - 22.5, centerY - holeHeight / 2 - 30);  // 位置调整（放大1.5倍）
-        }
-        
-        // 绘制光屏
-        function drawScreen(x, centerY) {
-            const screenHeight = 300; // 光屏高度放大为原来的1.5倍（200 * 1.5 = 300）
-            const topY = centerY - screenHeight / 2;
-            const bottomY = centerY + screenHeight / 2;
-            
-            // 绘制光屏（放大为原来的1.5倍）- 改为灰色
-            ctx.strokeStyle = '#87CEFA';  // 灰色
-            ctx.lineWidth = 12;  // 原来为8，现在放大为12（1.5倍）
-            ctx.beginPath();
-            ctx.moveTo(x, topY);
-            ctx.lineTo(x, bottomY);
-            ctx.stroke();
-            
-            // 绘制光屏边框（边框也相应放大）- 改为灰色
-            ctx.strokeStyle = '#87CEFA';  // 灰色
-            ctx.strokeRect(x - 6, topY, 12, screenHeight);  // 边框放大为原来的1.5倍
-            
-            // 添加标签
-            ctx.fillStyle = '#333';
-            ctx.font = '21px Arial';  // 字体放大为原来的1.5倍
-            ctx.fillText('光屏', x - 22.5, centerY - screenHeight / 2 - 30);  // 位置调整（放大1.5倍）
-        }
-        
-        // 计算并绘制成像
-        function drawImage(objectX, centerY, objectHeight, holeX, screenX) {
-            // 根据小孔成像原理计算像的高度
-            // 像高/物高 = 像距/物距（相似三角形原理）
-            const imageHeight = (objectHeight * screenDistance) / objectDistance;
-            
-            // 像的位置（倒立，所以在中心线上下颠倒）
-            const imageTopY = centerY + imageHeight / 2;  // 注意：这里是倒立，所以上下颠倒
-            const imageBottomY = centerY - imageHeight / 2;
-            
-            // 绘制成像线段（放大为原来的1.5倍）- 顶端10像素不显示，让箭头清晰可见
-            ctx.strokeStyle = '#9b59b6';
-            ctx.lineWidth = 13.5;  // 原来为9，现在放大为13.5（1.5倍）
-            ctx.beginPath();
-            ctx.moveTo(screenX, imageTopY - 15);  // 从顶端下方15像素开始绘制（放大1.5倍）
-            ctx.lineTo(screenX, imageBottomY);
-            ctx.stroke();
-            
-            // 在像的顶端绘制朝下的箭头（三角形）- 注意像是倒立的，箭头显示在线段上方
-            drawArrow(screenX, imageTopY, 'down', '#9b59b6');
-            
-            // 添加标签
-            ctx.fillStyle = '#333';
-            ctx.font = '21px Arial';  // 字体放大为原来的1.5倍
-            ctx.fillText('倒立的像', screenX - 37.5, centerY + imageHeight / 2 + 30);  // 位置调整（放大1.5倍）
-        }
-        
-        // 绘制箭头（三角形）
-        function drawArrow(x, y, direction, color) {
-            const arrowSize = 30; // 箭头大小放大为原来的1.5倍（20 * 1.5 = 30）
-            
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            
-            if (direction === 'up') {
-                // 绘制朝上的箭头（三角形）
-                ctx.moveTo(x, y); // 三角形顶点
-                ctx.lineTo(x - arrowSize/2, y + arrowSize); // 左下角
-                ctx.lineTo(x + arrowSize/2, y + arrowSize); // 右下角
-            } else if (direction === 'down') {
-                // 绘制朝下的箭头（三角形）
-                ctx.moveTo(x, y); // 三角形顶点
-                ctx.lineTo(x - arrowSize/2, y - arrowSize); // 左上角
-                ctx.lineTo(x + arrowSize/2, y - arrowSize); // 右上角
-            }
-            
-            ctx.closePath();
-            ctx.fill();
-        }
-        
-        // 绘制光线路径
-        function drawLightRays(objectX, centerY, objectHeight, holeX, screenX) {
-            const objectTopY = centerY - objectHeight / 2;  // 物体顶端y坐标
-            const objectBottomY = centerY + objectHeight / 2; // 物体底端y坐标
-            
-            // 计算像的位置（用于光线终点）
-            const imageHeight = (objectHeight * screenDistance) / objectDistance;
-            const imageTopY = centerY + imageHeight / 2;  // 倒立像的顶端（实际是物体的底端成像）
-            const imageBottomY = centerY - imageHeight / 2; // 倒立像的底端（实际是物体的顶端成像）
-            
-            // 计算光线路径上的关键点
-            // 从物体顶端到小孔的路径
-            const topRayHoleY = objectTopY + (holeX - objectX) * (centerY - objectTopY) / objectDistance;
-            // 从小孔到像底端的路径
-            const topRayScreenY = imageBottomY;
-            
-            // 从物体底端到小孔的路径
-            const bottomRayHoleY = objectBottomY - (holeX - objectX) * (objectBottomY - centerY) / objectDistance;
-            // 从小孔到像顶端的路径
-            const bottomRayScreenY = imageTopY;
-            
-            // 绘制从物体顶端发出的光线
-            ctx.strokeStyle = '#f39c12';
-            ctx.lineWidth = 2.25;  // 光线宽度放大为原来的1.5倍（1.5 * 1.5 = 2.25）
-            ctx.beginPath();
-            // 从物体顶端到小孔
-            ctx.moveTo(objectX, objectTopY);
-            ctx.lineTo(holeX, topRayHoleY);
-            // 从小孔到光屏上的像底端（倒立成像）
-            ctx.lineTo(screenX, topRayScreenY);
-            ctx.stroke();
-            
-            // 为顶端光线添加箭头（小孔左侧和右侧各一个）
-            // 小孔左侧箭头（从物体到小孔的方向）
-            const topRayLeftX = (objectX + holeX) / 2;
-            const topRayLeftY = (objectTopY + topRayHoleY) / 2;
-            drawArrowOnRay(topRayLeftX, topRayLeftY, holeX - objectX, topRayHoleY - objectTopY, '#f39c12');
-            
-            // 小孔右侧箭头（从小孔到光屏的方向）
-            const topRayRightX = (holeX + screenX) / 2;
-            const topRayRightY = (topRayHoleY + topRayScreenY) / 2;
-            drawArrowOnRay(topRayRightX, topRayRightY, screenX - holeX, topRayScreenY - topRayHoleY, '#f39c12');
-            
-            // 绘制从物体底端发出的光线
-            ctx.strokeStyle = '#e67e22';
-            ctx.beginPath();
-            // 从物体底端到小孔
-            ctx.moveTo(objectX, objectBottomY);
-            ctx.lineTo(holeX, bottomRayHoleY);
-            // 从小孔到光屏上的像顶端（倒立成像）
-            ctx.lineTo(screenX, bottomRayScreenY);
-            ctx.stroke();
-            
-            // 为底端光线添加箭头（小孔左侧和右侧各一个）
-            // 小孔左侧箭头（从物体到小孔的方向）
-            const bottomRayLeftX = (objectX + holeX) / 2;
-            const bottomRayLeftY = (objectBottomY + bottomRayHoleY) / 2;
-            drawArrowOnRay(bottomRayLeftX, bottomRayLeftY, holeX - objectX, bottomRayHoleY - objectBottomY, '#e67e22');
-            
-            // 小孔右侧箭头（从小孔到光屏的方向）
-            const bottomRayRightX = (holeX + screenX) / 2;
-            const bottomRayRightY = (bottomRayHoleY + bottomRayScreenY) / 2;
-            drawArrowOnRay(bottomRayRightX, bottomRayRightY, screenX - holeX, bottomRayScreenY - bottomRayHoleY, '#e67e22');
-            
-            // 在小孔处绘制光线交汇点标记
-            ctx.fillStyle = '#f39c12';
-            ctx.beginPath();
-            ctx.arc(holeX, centerY, 4.5, 0, Math.PI * 2);  // 交汇点标记放大为原来的1.5倍
-            ctx.fill();
-        }
-        
-        // 在光线上绘制箭头的辅助函数
-        function drawArrowOnRay(x, y, dx, dy, color) {
-            // 计算光线的角度
-            const angle = Math.atan2(dy, dx);
-            const arrowSize = 15; // 箭头大小
-            
-            ctx.fillStyle = color;
-            ctx.beginPath();
-            
-            // 绘制指向光线方向的箭头
-            ctx.moveTo(x, y);
-            ctx.lineTo(x - arrowSize * Math.cos(angle) + arrowSize/2 * Math.sin(angle), 
-                      y - arrowSize * Math.sin(angle) - arrowSize/2 * Math.cos(angle));
-            ctx.lineTo(x - arrowSize * Math.cos(angle) - arrowSize/2 * Math.sin(angle), 
-                      y - arrowSize * Math.sin(angle) + arrowSize/2 * Math.cos(angle));
-            
-            ctx.closePath();
-            ctx.fill();
-        }
-        
-        // 页面加载完成后初始化实验
-        window.addEventListener('load', initExperiment);
-    </script>
+ <div class="experiment-container">
+ <canvas id="experimentCanvas" width="800" height="400"></canvas>
+ </div>
+
+ <div class="control-panel">
+ <div class="control-group">
+ <label for="objectDistance">物体到小孔的距离: <span id="objectDistanceValue">200</span> 像素</label>
+ <input type="range" id="objectDistance" min="50" max="350" value="200" step="1">
+ </div>
+
+ <div class="control-group">
+ <label for="screenDistance">光屏到小孔的距离: <span id="screenDistanceValue">200</span> 像素</label>
+ <input type="range" id="screenDistance" min="50" max="350" value="200" step="1">
+ </div>
+
+ <div class="control-group">
+ <label for="objectHeight">物体高度: <span id="objectHeightValue">100</span> 像素</label>
+ <input type="range" id="objectHeight" min="20" max="150" value="100" step="1">
+ </div>
+
+ <button id="resetButton" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">重置实验</button>
+ </div>
+
+ <div class="physics-explanation">
+ <h3>物理原理说明</h3>
+ <p><strong>小孔成像原理：</strong>光在均匀介质中沿直线传播。物体发出的光线通过小孔后，会在光屏上形成倒立的实像。</p>
+ <p><strong>成像规律：</strong></p>
+ <ul>
+ <li>像的大小与物体到小孔的距离成反比</li>
+ <li>像的倒立性质证明了光的直线传播特性</li>
+ <li>像的清晰度与小孔的大小有关（小孔越小，像越清晰）</li>
+ </ul>
+ </div>
+
+ <div class="instructions">
+ <h3>操作说明</h3>
+ <ul>
+ <li>使用滑块调整物体和光屏的位置</li>
+ <li>在画布上直接拖拽物体或光屏来改变位置</li>
+ <li>观察光线传播路径和成像效果</li>
+ <li>点击"重置实验"按钮恢复初始状态</li>
+ </ul>
+ </div>
+
+ <script>
+ // 获取Canvas元素和上下文
+ const canvas = document.getElementById('experimentCanvas');
+ const ctx = canvas.getContext('2d');
+
+ // 实验参数 - 这些变量控制实验的各个部分
+ let objectDistance = 200; // 物体到小孔的距离（像素）
+ let screenDistance = 200; // 光屏到小孔的距离（像素）
+ let objectHeight = 100; // 物体高度（像素）
+ const holeWidth = 10; // 小孔宽度（固定值）
+ const canvasWidth = 800; // 画布宽度
+ const canvasHeight = 400; // 画布高度
+ const holeX = canvasWidth / 2; // 小孔在画布中心的x坐标
+
+ // 拖拽相关变量
+ let isDragging = false;
+ let dragTarget = null; // 'object' 或 'screen'
+ let dragOffsetX = 0;
+
+ // 初始化实验
+ function initExperiment() {
+ // 设置滑块事件监听
+ document.getElementById('objectDistance').addEventListener('input', updateObjectDistance);
+ document.getElementById('screenDistance').addEventListener('input', updateScreenDistance);
+ document.getElementById('objectHeight').addEventListener('input', updateObjectHeight);
+ document.getElementById('resetButton').addEventListener('click', resetExperiment);
+
+ // 设置画布拖拽事件 - 同时支持鼠标和触摸
+ canvas.addEventListener('mousedown', startDrag);
+ canvas.addEventListener('mousemove', drag);
+ canvas.addEventListener('mouseup', endDrag);
+ canvas.addEventListener('mouseleave', endDrag);
+
+ // 添加触摸事件支持（用于希沃平台等触摸屏设备）
+ canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+ canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+ canvas.addEventListener('touchend', handleTouchEnd);
+ canvas.addEventListener('touchcancel', handleTouchEnd);
+
+ // 初始绘制
+ drawExperiment();
+ }
+
+ // 更新物体距离
+ function updateObjectDistance(e) {
+ objectDistance = parseInt(e.target.value);
+ document.getElementById('objectDistanceValue').textContent = objectDistance;
+ drawExperiment();
+ }
+
+ // 更新光屏距离
+ function updateScreenDistance(e) {
+ screenDistance = parseInt(e.target.value);
+ document.getElementById('screenDistanceValue').textContent = screenDistance;
+ drawExperiment();
+ }
+
+ // 更新物体高度
+ function updateObjectHeight(e) {
+ objectHeight = parseInt(e.target.value);
+ document.getElementById('objectHeightValue').textContent = objectHeight;
+ drawExperiment();
+ }
+
+ // 重置实验
+ function resetExperiment() {
+ objectDistance = 200;
+ screenDistance = 200;
+ objectHeight = 100;
+
+ document.getElementById('objectDistance').value = objectDistance;
+ document.getElementById('screenDistance').value = screenDistance;
+ document.getElementById('objectHeight').value = objectHeight;
+
+ document.getElementById('objectDistanceValue').textContent = objectDistance;
+ document.getElementById('screenDistanceValue').textContent = screenDistance;
+ document.getElementById('objectHeightValue').textContent = objectHeight;
+
+ drawExperiment();
+ }
+
+ // 开始拖拽
+ function startDrag(e) {
+ const rect = canvas.getBoundingClientRect();
+ const mouseX = e.clientX - rect.left;
+
+ // 检查是否点击了物体
+ const objectX = holeX - objectDistance;
+ if (mouseX >= objectX - 20 && mouseX <= objectX + 20) {
+ isDragging = true;
+ dragTarget = 'object';
+ dragOffsetX = mouseX - objectX;
+ }
+
+ // 检查是否点击了光屏
+ const screenX = holeX + screenDistance;
+ if (mouseX >= screenX - 20 && mouseX <= screenX + 20) {
+ isDragging = true;
+ dragTarget = 'screen';
+ dragOffsetX = mouseX - screenX;
+ }
+ }
+
+ // 拖拽过程
+ function drag(e) {
+ if (!isDragging) return;
+
+ const rect = canvas.getBoundingClientRect();
+ const mouseX = e.clientX - rect.left;
+
+ if (dragTarget === 'object') {
+ // 计算新的物体距离（限制在合理范围内）
+ const newObjectDistance = holeX - (mouseX - dragOffsetX);
+ if (newObjectDistance >= 50 && newObjectDistance <= 350) {
+ objectDistance = newObjectDistance;
+ document.getElementById('objectDistance').value = objectDistance;
+ document.getElementById('objectDistanceValue').textContent = objectDistance;
+ }
+ } else if (dragTarget === 'screen') {
+ // 计算新的光屏距离（限制在合理范围内）
+ const newScreenDistance = (mouseX - dragOffsetX) - holeX;
+ if (newScreenDistance >= 50 && newScreenDistance <= 350) {
+ screenDistance = newScreenDistance;
+ document.getElementById('screenDistance').value = screenDistance;
+ document.getElementById('screenDistanceValue').textContent = screenDistance;
+ }
+ }
+
+ drawExperiment();
+ }
+
+ // 结束拖拽
+ function endDrag() {
+ isDragging = false;
+ dragTarget = null;
+ }
+
+ // 触摸开始事件处理
+ function handleTouchStart(e) {
+ e.preventDefault(); // 阻止默认行为（如页面滚动）
+
+ // 获取第一个触摸点
+ const touch = e.touches[0];
+ const rect = canvas.getBoundingClientRect();
+ const touchX = touch.clientX - rect.left;
+
+ // 检查是否触摸了物体
+ const objectX = holeX - objectDistance;
+ if (touchX >= objectX - 30 && touchX <= objectX + 30) { // 增大触摸区域
+ isDragging = true;
+ dragTarget = 'object';
+ dragOffsetX = touchX - objectX;
+ }
+
+ // 检查是否触摸了光屏
+ const screenX = holeX + screenDistance;
+ if (touchX >= screenX - 30 && touchX <= screenX + 30) { // 增大触摸区域
+ isDragging = true;
+ dragTarget = 'screen';
+ dragOffsetX = touchX - screenX;
+ }
+ }
+
+ // 触摸移动事件处理
+ function handleTouchMove(e) {
+ e.preventDefault(); // 阻止默认行为
+
+ if (!isDragging) return;
+
+ // 获取第一个触摸点
+ const touch = e.touches[0];
+ const rect = canvas.getBoundingClientRect();
+ const touchX = touch.clientX - rect.left;
+
+ if (dragTarget === 'object') {
+ // 计算新的物体距离（限制在合理范围内）
+ const newObjectDistance = holeX - (touchX - dragOffsetX);
+ if (newObjectDistance >= 50 && newObjectDistance <= 350) {
+ objectDistance = newObjectDistance;
+ document.getElementById('objectDistance').value = objectDistance;
+ document.getElementById('objectDistanceValue').textContent = objectDistance;
+ }
+ } else if (dragTarget === 'screen') {
+ // 计算新的光屏距离（限制在合理范围内）
+ const newScreenDistance = (touchX - dragOffsetX) - holeX;
+ if (newScreenDistance >= 50 && newScreenDistance <= 350) {
+ screenDistance = newScreenDistance;
+ document.getElementById('screenDistance').value = screenDistance;
+ document.getElementById('screenDistanceValue').textContent = screenDistance;
+ }
+ }
+
+ drawExperiment();
+ }
+
+ // 触摸结束事件处理
+ function handleTouchEnd(e) {
+ e.preventDefault();
+ isDragging = false;
+ dragTarget = null;
+ }
+
+ // 绘制整个实验
+ function drawExperiment() {
+ // 清空画布
+ ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+ // 计算各个元素的位置
+ const objectX = holeX - objectDistance; // 物体x坐标
+ const screenX = holeX + screenDistance; // 光屏x坐标
+ const centerY = canvasHeight / 2; // 中心y坐标
+
+ // 绘制背景网格（辅助线）
+ drawGrid();
+
+ // 绘制物体（竖直线段）
+ drawObject(objectX, centerY, objectHeight);
+
+ // 绘制小孔
+ drawHole(holeX, centerY);
+
+ // 绘制光屏
+ drawScreen(screenX, centerY);
+
+ // 计算并绘制成像
+ drawImage(objectX, centerY, objectHeight, holeX, screenX);
+
+ // 绘制光线路径
+ drawLightRays(objectX, centerY, objectHeight, holeX, screenX);
+ }
+
+ // 绘制背景网格
+ function drawGrid() {
+ ctx.strokeStyle = '#ddd';
+ ctx.lineWidth = 0.5;
+
+ // 绘制水平网格线
+ for (let y = 0; y <= canvasHeight; y += 20) {
+ ctx.beginPath();
+ ctx.moveTo(0, y);
+ ctx.lineTo(canvasWidth, y);
+ ctx.stroke();
+ }
+
+ // 绘制垂直网格线
+ for (let x = 0; x <= canvasWidth; x += 20) {
+ ctx.beginPath();
+ ctx.moveTo(x, 0);
+ ctx.lineTo(x, canvasHeight);
+ ctx.stroke();
+ }
+ }
+
+ // 绘制物体
+ function drawObject(x, centerY, height) {
+ const topY = centerY - height / 2;
+ const bottomY = centerY + height / 2;
+
+ // 绘制物体线段（放大为原来的1.5倍）- 顶端10像素不显示，让箭头清晰可见
+ ctx.strokeStyle = '#e74c3c';
+ ctx.lineWidth = 13.5; // 原来为9，现在放大为13.5（1.5倍）
+ ctx.beginPath();
+ ctx.moveTo(x, topY + 15); // 从顶端下方15像素开始绘制（放大1.5倍）
+ ctx.lineTo(x, bottomY);
+ ctx.stroke();
+
+ // 在物体顶端绘制朝上的箭头（三角形）- 箭头显示在线段上方
+ drawArrow(x, topY, 'up', '#e74c3c');
+
+ // 添加标签
+ ctx.fillStyle = '#333';
+ ctx.font = '21px Arial'; // 字体放大为原来的1.5倍
+ ctx.fillText('物体', x - 22.5, centerY - height / 2 - 30); // 位置调整（放大1.5倍）
+ }
+
+ // 绘制小孔
+ function drawHole(x, centerY) {
+ const holeHeight = 120; // 小孔高度放大为原来的1.5倍（80 * 1.5 = 120）
+ const topY = centerY - holeHeight / 2;
+ const bottomY = centerY + holeHeight / 2;
+
+ // 绘制小孔边框
+ ctx.strokeStyle = '#3498db';
+ ctx.lineWidth = 3; // 边框宽度放大为原来的1.5倍
+ ctx.strokeRect(x - holeWidth / 2, topY, holeWidth, holeHeight);
+
+ // 绘制小孔中心标记
+ ctx.fillStyle = '#3498db';
+ ctx.beginPath();
+ ctx.arc(x, centerY, 4.5, 0, Math.PI * 2); // 中心标记放大为原来的1.5倍
+ ctx.fill();
+
+ // 添加标签
+ ctx.fillStyle = '#333';
+ ctx.font = '21px Arial'; // 字体放大为原来的1.5倍
+ ctx.fillText('小孔', x - 22.5, centerY - holeHeight / 2 - 30); // 位置调整（放大1.5倍）
+ }
+
+ // 绘制光屏
+ function drawScreen(x, centerY) {
+ const screenHeight = 300; // 光屏高度放大为原来的1.5倍（200 * 1.5 = 300）
+ const topY = centerY - screenHeight / 2;
+ const bottomY = centerY + screenHeight / 2;
+
+ // 绘制光屏（放大为原来的1.5倍）- 改为灰色
+ ctx.strokeStyle = '#87CEFA'; // 灰色
+ ctx.lineWidth = 12; // 原来为8，现在放大为12（1.5倍）
+ ctx.beginPath();
+ ctx.moveTo(x, topY);
+ ctx.lineTo(x, bottomY);
+ ctx.stroke();
+
+ // 绘制光屏边框（边框也相应放大）- 改为灰色
+ ctx.strokeStyle = '#87CEFA'; // 灰色
+ ctx.strokeRect(x - 6, topY, 12, screenHeight); // 边框放大为原来的1.5倍
+
+ // 添加标签
+ ctx.fillStyle = '#333';
+ ctx.font = '21px Arial'; // 字体放大为原来的1.5倍
+ ctx.fillText('光屏', x - 22.5, centerY - screenHeight / 2 - 30); // 位置调整（放大1.5倍）
+ }
+
+ // 计算并绘制成像
+ function drawImage(objectX, centerY, objectHeight, holeX, screenX) {
+ // 根据小孔成像原理计算像的高度
+ // 像高/物高 = 像距/物距（相似三角形原理）
+ const imageHeight = (objectHeight * screenDistance) / objectDistance;
+
+ // 像的位置（倒立，所以在中心线上下颠倒）
+ const imageTopY = centerY + imageHeight / 2; // 注意：这里是倒立，所以上下颠倒
+ const imageBottomY = centerY - imageHeight / 2;
+
+ // 绘制成像线段（放大为原来的1.5倍）- 顶端10像素不显示，让箭头清晰可见
+ ctx.strokeStyle = '#9b59b6';
+ ctx.lineWidth = 13.5; // 原来为9，现在放大为13.5（1.5倍）
+ ctx.beginPath();
+ ctx.moveTo(screenX, imageTopY - 15); // 从顶端下方15像素开始绘制（放大1.5倍）
+ ctx.lineTo(screenX, imageBottomY);
+ ctx.stroke();
+
+ // 在像的顶端绘制朝下的箭头（三角形）- 注意像是倒立的，箭头显示在线段上方
+ drawArrow(screenX, imageTopY, 'down', '#9b59b6');
+
+ // 添加标签
+ ctx.fillStyle = '#333';
+ ctx.font = '21px Arial'; // 字体放大为原来的1.5倍
+ ctx.fillText('倒立的像', screenX - 37.5, centerY + imageHeight / 2 + 30); // 位置调整（放大1.5倍）
+ }
+
+ // 绘制箭头（三角形）
+ function drawArrow(x, y, direction, color) {
+ const arrowSize = 30; // 箭头大小放大为原来的1.5倍（20 * 1.5 = 30）
+
+ ctx.fillStyle = color;
+ ctx.beginPath();
+
+ if (direction === 'up') {
+ // 绘制朝上的箭头（三角形）
+ ctx.moveTo(x, y); // 三角形顶点
+ ctx.lineTo(x - arrowSize/2, y + arrowSize); // 左下角
+ ctx.lineTo(x + arrowSize/2, y + arrowSize); // 右下角
+ } else if (direction === 'down') {
+ // 绘制朝下的箭头（三角形）
+ ctx.moveTo(x, y); // 三角形顶点
+ ctx.lineTo(x - arrowSize/2, y - arrowSize); // 左上角
+ ctx.lineTo(x + arrowSize/2, y - arrowSize); // 右上角
+ }
+
+ ctx.closePath();
+ ctx.fill();
+ }
+
+ // 绘制光线路径
+ function drawLightRays(objectX, centerY, objectHeight, holeX, screenX) {
+ const objectTopY = centerY - objectHeight / 2; // 物体顶端y坐标
+ const objectBottomY = centerY + objectHeight / 2; // 物体底端y坐标
+
+ // 计算像的位置（用于光线终点）
+ const imageHeight = (objectHeight * screenDistance) / objectDistance;
+ const imageTopY = centerY + imageHeight / 2; // 倒立像的顶端（实际是物体的底端成像）
+ const imageBottomY = centerY - imageHeight / 2; // 倒立像的底端（实际是物体的顶端成像）
+
+ // 计算光线路径上的关键点
+ // 从物体顶端到小孔的路径
+ const topRayHoleY = objectTopY + (holeX - objectX) * (centerY - objectTopY) / objectDistance;
+ // 从小孔到像底端的路径
+ const topRayScreenY = imageBottomY;
+
+ // 从物体底端到小孔的路径
+ const bottomRayHoleY = objectBottomY - (holeX - objectX) * (objectBottomY - centerY) / objectDistance;
+ // 从小孔到像顶端的路径
+ const bottomRayScreenY = imageTopY;
+
+ // 绘制从物体顶端发出的光线
+ ctx.strokeStyle = '#f39c12';
+ ctx.lineWidth = 2.25; // 光线宽度放大为原来的1.5倍（1.5 * 1.5 = 2.25）
+ ctx.beginPath();
+ // 从物体顶端到小孔
+ ctx.moveTo(objectX, objectTopY);
+ ctx.lineTo(holeX, topRayHoleY);
+ // 从小孔到光屏上的像底端（倒立成像）
+ ctx.lineTo(screenX, topRayScreenY);
+ ctx.stroke();
+
+ // 为顶端光线添加箭头（小孔左侧和右侧各一个）
+ // 小孔左侧箭头（从物体到小孔的方向）
+ const topRayLeftX = (objectX + holeX) / 2;
+ const topRayLeftY = (objectTopY + topRayHoleY) / 2;
+ drawArrowOnRay(topRayLeftX, topRayLeftY, holeX - objectX, topRayHoleY - objectTopY, '#f39c12');
+
+ // 小孔右侧箭头（从小孔到光屏的方向）
+ const topRayRightX = (holeX + screenX) / 2;
+ const topRayRightY = (topRayHoleY + topRayScreenY) / 2;
+ drawArrowOnRay(topRayRightX, topRayRightY, screenX - holeX, topRayScreenY - topRayHoleY, '#f39c12');
+
+ // 绘制从物体底端发出的光线
+ ctx.strokeStyle = '#e67e22';
+ ctx.beginPath();
+ // 从物体底端到小孔
+ ctx.moveTo(objectX, objectBottomY);
+ ctx.lineTo(holeX, bottomRayHoleY);
+ // 从小孔到光屏上的像顶端（倒立成像）
+ ctx.lineTo(screenX, bottomRayScreenY);
+ ctx.stroke();
+
+ // 为底端光线添加箭头（小孔左侧和右侧各一个）
+ // 小孔左侧箭头（从物体到小孔的方向）
+ const bottomRayLeftX = (objectX + holeX) / 2;
+ const bottomRayLeftY = (objectBottomY + bottomRayHoleY) / 2;
+ drawArrowOnRay(bottomRayLeftX, bottomRayLeftY, holeX - objectX, bottomRayHoleY - objectBottomY, '#e67e22');
+
+ // 小孔右侧箭头（从小孔到光屏的方向）
+ const bottomRayRightX = (holeX + screenX) / 2;
+ const bottomRayRightY = (bottomRayHoleY + bottomRayScreenY) / 2;
+ drawArrowOnRay(bottomRayRightX, bottomRayRightY, screenX - holeX, bottomRayScreenY - bottomRayHoleY, '#e67e22');
+
+ // 在小孔处绘制光线交汇点标记
+ ctx.fillStyle = '#f39c12';
+ ctx.beginPath();
+ ctx.arc(holeX, centerY, 4.5, 0, Math.PI * 2); // 交汇点标记放大为原来的1.5倍
+ ctx.fill();
+ }
+
+ // 在光线上绘制箭头的辅助函数
+ function drawArrowOnRay(x, y, dx, dy, color) {
+ // 计算光线的角度
+ const angle = Math.atan2(dy, dx);
+ const arrowSize = 15; // 箭头大小
+
+ ctx.fillStyle = color;
+ ctx.beginPath();
+
+ // 绘制指向光线方向的箭头
+ ctx.moveTo(x, y);
+ ctx.lineTo(x - arrowSize * Math.cos(angle) + arrowSize/2 * Math.sin(angle),
+ y - arrowSize * Math.sin(angle) - arrowSize/2 * Math.cos(angle));
+ ctx.lineTo(x - arrowSize * Math.cos(angle) - arrowSize/2 * Math.sin(angle),
+ y - arrowSize * Math.sin(angle) + arrowSize/2 * Math.cos(angle));
+
+ ctx.closePath();
+ ctx.fill();
+ }
+
+ // 页面加载完成后初始化实验
+ window.addEventListener('load', initExperiment);
+ </script>
 </body>
 </html>

@@ -1,327 +1,337 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 基础图标 -->
-    <link rel="icon" href="/images/logo.ico" type="image/x-icon">
-    <!-- 兼容微信/手机端的高清图标 -->
-    <link rel="icon" href="/images/logo.png" type="image/png" sizes="32x32">
-    <!-- 页面元数据设置 -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>光的三原色组合游戏</title>
-    
-    <!-- CSS样式定义 -->
-    <style>
-        /* 页面主体样式 */
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;  /* 字体设置 */
-            margin: 0;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  /* 背景渐变 */
-            min-height: 100vh;  /* 最小高度为视口高度 */
-        }
-        
-        /* 页面主标题样式 */
-        h1 {
-            text-align: center;  /* 居中对齐 */
-            color: #ffeb3b;  /* 亮黄色 */
-            margin-bottom: 40px;  /* 底部外边距 */
-            font-size: 48px;  /* 字体大小 */
-            font-weight: bold;  /* 粗体 */
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);  /* 文字阴影 */
-            letter-spacing: 2px;  /* 字间距 */
-        }
-        
-        /* 主容器布局 */
-        .container {
-            display: flex;  /* 弹性布局 */
-            gap: 80px;  /* 子元素间距 */
-            max-width: 1200px;  /* 最大宽度 */
-            margin: 0 auto;  /* 水平居中 */
-            align-items: center;  /* 垂直居中 */
-        }
-        
-        /* 颜色显示区域样式 */
-        .color-display {
-            flex: 1;  /* 占据剩余空间 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* 颜色圆形样式 */
-        .color-circle {
-            width: 400px;  /* 圆形宽度 */
-            height: 400px;  /* 圆形高度 */
-            border-radius: 50%;  /* 圆形边框半径 */
-            background-color: rgb(0, 0, 0);  /* 初始黑色背景 */
-            border: 8px solid white;  /* 白色边框 */
-            box-shadow: 0 15px 40px rgba(0,0,0,0.3);  /* 阴影效果 */
-            margin-bottom: 30px;  /* 底部外边距 */
-            transition: background-color 0.3s ease;  /* 颜色过渡效果 */
-        }
-        
-        /* 颜色值显示样式 */
-        .color-value {
-            font-size: 24px;  /* 字体大小 */
-            font-weight: bold;  /* 粗体 */
-            color: white;  /* 白色文字 */
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);  /* 文字阴影 */
-            background: rgba(0, 0, 0, 0.3);  /* 半透明背景 */
-            padding: 10px 20px;  /* 内边距 */
-            border-radius: 10px;  /* 圆角 */
-        }
-        
-        /* 控制面板样式 */
-        .controls {
-            flex: 1;  /* 占据剩余空间 */
-            display: flex;
-            flex-direction: column;
-            gap: 40px;  /* 子元素间距 */
-            background: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
-            padding: 40px;  /* 内边距 */
-            border-radius: 20px;  /* 圆角 */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);  /* 阴影效果 */
-            backdrop-filter: blur(10px);  /* 背景模糊效果 */
-        }
-        
-        /* 滑块容器样式 */
-        .slider-container {
-            display: flex;  /* 弹性布局 */
-            flex-direction: column;  /* 垂直排列 */
-            gap: 15px;  /* 子元素间距 */
-        }
-        
-        /* 滑块标签样式 */
-        .slider-label {
-            display: flex;  /* 弹性布局 */
-            justify-content: space-between;  /* 两端对齐 */
-            align-items: center;  /* 垂直居中 */
-            font-size: 20px;  /* 字体大小 */
-            font-weight: bold;  /* 粗体 */
-            color: #333;  /* 深灰色文字 */
-        }
-        
-        /* 滑块样式 */
-        input[type="range"] {
-            width: 100%;  /* 宽度100% */
-            height: 20px;  /* 高度 */
-            border-radius: 10px;  /* 圆角 */
-            background: linear-gradient(90deg, #ddd, #bbb);  /* 渐变背景 */
-            outline: none;  /* 无轮廓 */
-            -webkit-appearance: none;  /* 移除默认样式 */
-        }
-        
-        /* 滑块滑块样式 */
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;  /* 移除默认样式 */
-            width: 30px;  /* 滑块宽度 */
-            height: 30px;  /* 滑块高度 */
-            border-radius: 50%;  /* 圆形滑块 */
-            cursor: pointer;  /* 手型光标 */
-            border: 3px solid white;  /* 白色边框 */
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);  /* 阴影效果 */
-        }
-        
-        /* 红色滑块样式 */
-        .red-slider::-webkit-slider-thumb {
-            background: linear-gradient(45deg, #ff0000, #ff6b6b);  /* 红色渐变 */
-        }
-        
-        /* 绿色滑块样式 */
-        .green-slider::-webkit-slider-thumb {
-            background: linear-gradient(45deg, #00ff00, #4ecdc4);  /* 绿色渐变 */
-        }
-        
-        /* 蓝色滑块样式 */
-        .blue-slider::-webkit-slider-thumb {
-            background: linear-gradient(45deg, #0000ff, #45b7d1);  /* 蓝色渐变 */
-        }
-        
-        /* 滑块值显示样式 */
-        .slider-value {
-            font-size: 18px;  /* 字体大小 */
-            font-weight: bold;  /* 粗体 */
-            color: #666;  /* 灰色文字 */
-            text-align: center;  /* 居中对齐 */
-            background: #f0f0f0;  /* 浅灰色背景 */
-            padding: 5px 15px;  /* 内边距 */
-            border-radius: 5px;  /* 圆角 */
-            min-width: 60px;  /* 最小宽度 */
-        }
-        
-        /* 重置按钮样式 */
-        .reset-btn {
-            padding: 15px 30px;  /* 内边距 */
-            cursor: pointer;  /* 手型光标 */
-            background: linear-gradient(45deg, #4CAF50, #45a049);  /* 绿色渐变背景 */
-            color: white;  /* 白色文字 */
-            border: none;  /* 无边框 */
-            border-radius: 10px;  /* 圆角 */
-            font-size: 18px;  /* 字体大小 */
-            font-weight: bold;  /* 粗体 */
-            transition: all 0.3s ease;  /* 过渡效果 */
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);  /* 阴影效果 */
-            margin-top: 20px;  /* 顶部外边距 */
-        }
-        
-        .reset-btn:hover {
-            transform: translateY(-2px);  /* 悬停上移效果 */
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);  /* 悬停阴影效果 */
-        }
-        
-        /* 说明文字样式 */
-        .instructions {
-            text-align: center;  /* 居中对齐 */
-            color: white;  /* 白色文字 */
-            font-size: 18px;  /* 字体大小 */
-            margin-top: 30px;  /* 顶部外边距 */
-            line-height: 1.6;  /* 行高 */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);  /* 文字阴影 */
-        }
-    </style>
+ <!-- 基础图标 -->
+ <link rel="icon" href="/images/logo.ico" type="image/x-icon">
+ <!-- 兼容微信/手机端的高清图标 -->
+ <link rel="icon" href="/images/logo.png" type="image/png" sizes="32x32">
+ <!-- 页面元数据设置 -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>York 周老师物理：光的三原色组合游戏</title>
+ <!-- CSS样式定义 -->
+ <style>
+ /* 页面主体样式 */
+ body {
+ font-family: 'Microsoft YaHei', Arial, sans-serif; /* 字体设置 */
+ margin: 0;
+ padding: 30px;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 背景渐变 */
+ min-height: 100vh; /* 最小高度为视口高度 */
+ }
+
+ /* 页面主标题样式 */
+ h1 {
+ text-align: center; /* 居中对齐 */
+ color: #ffeb3b; /* 亮黄色 */
+ margin-bottom: 40px; /* 底部外边距 */
+ font-size: 48px; /* 字体大小 */
+ font-weight: bold; /* 粗体 */
+ text-shadow: 3px 3px 6px rgba(0,0,0,0.4); /* 文字阴影 */
+ letter-spacing: 2px; /* 字间距 */
+ }
+
+ /* 主容器布局 */
+ .container {
+ display: flex; /* 弹性布局 */
+ gap: 80px; /* 子元素间距 */
+ max-width: 1200px; /* 最大宽度 */
+ margin: 0 auto; /* 水平居中 */
+ align-items: center; /* 垂直居中 */
+ }
+
+ /* 颜色显示区域样式 */
+ .color-display {
+ flex: 1; /* 占据剩余空间 */
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ }
+
+ /* 颜色圆形样式 */
+ .color-circle {
+ width: 400px; /* 圆形宽度 */
+ height: 400px; /* 圆形高度 */
+ border-radius: 50%; /* 圆形边框半径 */
+ background-color: rgb(0, 0, 0); /* 初始黑色背景 */
+ border: 8px solid white; /* 白色边框 */
+ box-shadow: 0 15px 40px rgba(0,0,0,0.3); /* 阴影效果 */
+ margin-bottom: 30px; /* 底部外边距 */
+ transition: background-color 0.3s ease; /* 颜色过渡效果 */
+ }
+
+ /* 颜色值显示样式 */
+ .color-value {
+ font-size: 24px; /* 字体大小 */
+ font-weight: bold; /* 粗体 */
+ color: white; /* 白色文字 */
+ text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* 文字阴影 */
+ background: rgba(0, 0, 0, 0.3); /* 半透明背景 */
+ padding: 10px 20px; /* 内边距 */
+ border-radius: 10px; /* 圆角 */
+ }
+
+ /* 控制面板样式 */
+ .controls {
+ flex: 1; /* 占据剩余空间 */
+ display: flex;
+ flex-direction: column;
+ gap: 40px; /* 子元素间距 */
+ background: rgba(255, 255, 255, 0.95); /* 半透明白色背景 */
+ padding: 40px; /* 内边距 */
+ border-radius: 20px; /* 圆角 */
+ box-shadow: 0 10px 30px rgba(0,0,0,0.2); /* 阴影效果 */
+ backdrop-filter: blur(10px); /* 背景模糊效果 */
+ }
+
+ /* 滑块容器样式 */
+ .slider-container {
+ display: flex; /* 弹性布局 */
+ flex-direction: column; /* 垂直排列 */
+ gap: 15px; /* 子元素间距 */
+ }
+
+ /* 滑块标签样式 */
+ .slider-label {
+ display: flex; /* 弹性布局 */
+ justify-content: space-between; /* 两端对齐 */
+ align-items: center; /* 垂直居中 */
+ font-size: 20px; /* 字体大小 */
+ font-weight: bold; /* 粗体 */
+ color: #333; /* 深灰色文字 */
+ }
+
+ /* 滑块样式 */
+ input[type="range"] {
+ width: 100%; /* 宽度100% */
+ height: 20px; /* 高度 */
+ border-radius: 10px; /* 圆角 */
+ background: linear-gradient(90deg, #ddd, #bbb); /* 渐变背景 */
+ outline: none; /* 无轮廓 */
+ -webkit-appearance: none; /* 移除默认样式 */
+ }
+
+ /* 滑块滑块样式 */
+ input[type="range"]::-webkit-slider-thumb {
+ -webkit-appearance: none; /* 移除默认样式 */
+ width: 30px; /* 滑块宽度 */
+ height: 30px; /* 滑块高度 */
+ border-radius: 50%; /* 圆形滑块 */
+ cursor: pointer; /* 手型光标 */
+ border: 3px solid white; /* 白色边框 */
+ box-shadow: 0 3px 10px rgba(0,0,0,0.3); /* 阴影效果 */
+ }
+
+ /* 红色滑块样式 */
+ .red-slider::-webkit-slider-thumb {
+ background: linear-gradient(45deg, #ff0000, #ff6b6b); /* 红色渐变 */
+ }
+
+ /* 绿色滑块样式 */
+ .green-slider::-webkit-slider-thumb {
+ background: linear-gradient(45deg, #00ff00, #4ecdc4); /* 绿色渐变 */
+ }
+
+ /* 蓝色滑块样式 */
+ .blue-slider::-webkit-slider-thumb {
+ background: linear-gradient(45deg, #0000ff, #45b7d1); /* 蓝色渐变 */
+ }
+
+ /* 滑块值显示样式 */
+ .slider-value {
+ font-size: 18px; /* 字体大小 */
+ font-weight: bold; /* 粗体 */
+ color: #666; /* 灰色文字 */
+ text-align: center; /* 居中对齐 */
+ background: #f0f0f0; /* 浅灰色背景 */
+ padding: 5px 15px; /* 内边距 */
+ border-radius: 5px; /* 圆角 */
+ min-width: 60px; /* 最小宽度 */
+ }
+
+ /* 重置按钮样式 */
+ .reset-btn {
+ padding: 15px 30px; /* 内边距 */
+ cursor: pointer; /* 手型光标 */
+ background: linear-gradient(45deg, #4CAF50, #45a049); /* 绿色渐变背景 */
+ color: white; /* 白色文字 */
+ border: none; /* 无边框 */
+ border-radius: 10px; /* 圆角 */
+ font-size: 18px; /* 字体大小 */
+ font-weight: bold; /* 粗体 */
+ transition: all 0.3s ease; /* 过渡效果 */
+ box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3); /* 阴影效果 */
+ margin-top: 20px; /* 顶部外边距 */
+ }
+
+ .reset-btn:hover {
+ transform: translateY(-2px); /* 悬停上移效果 */
+ box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4); /* 悬停阴影效果 */
+ }
+
+ /* 说明文字样式 */
+ .instructions {
+ text-align: center; /* 居中对齐 */
+ color: white; /* 白色文字 */
+ font-size: 18px; /* 字体大小 */
+ margin-top: 30px; /* 顶部外边距 */
+ line-height: 1.6; /* 行高 */
+ text-shadow: 1px 1px 2px rgba(0,0,0,0.3); /* 文字阴影 */
+ }
+ .home-btn {
+ position: fixed;
+ top: 12px;
+ left: 12px;
+ z-index: 9999;
+ background: rgba(0,0,0,0.55);
+ color: #fff;
+ padding: 6px 14px;
+ border-radius: 6px;
+ text-decoration: none;
+ font-size: 14px;
+ font-weight: bold;
+ backdrop-filter: blur(4px);
+ border: 1px solid rgba(255,255,255,0.15);
+ transition: background 0.2s;
+ }
+ .home-btn:hover {
+ background: rgba(0,0,0,0.75);
+ }
+ </style>
 </head>
-
-<!-- 页面主体内容 -->
 <body>
-    <!-- 页面主标题 -->
-    <h1>光的三原色组合游戏</h1>
-    
-    <!-- 主容器 -->
-    <div class="container">
-        <!-- 颜色显示区域 -->
-        <div class="color-display">
-            <!-- 颜色圆形 -->
-            <div class="color-circle" id="colorCircle"></div>
-            <!-- 颜色值显示 -->
-            <div class="color-value" id="colorValue">RGB(0, 0, 0)</div>
-        </div>
-        
-        <!-- 控制面板 -->
-        <div class="controls">
-            <!-- 红色滑块 -->
-            <div class="slider-container">
-                <div class="slider-label">
-                    <span style="color: #ff0000;">红色光 (R)</span>
-                    <span class="slider-value" id="redValue">0</span>
-                </div>
-                <input type="range" id="redSlider" class="red-slider" min="0" max="255" value="0">
-            </div>
-            
-            <!-- 绿色滑块 -->
-            <div class="slider-container">
-                <div class="slider-label">
-                    <span style="color: #00ff00;">绿色光 (G)</span>
-                    <span class="slider-value" id="greenValue">0</span>
-                </div>
-                <input type="range" id="greenSlider" class="green-slider" min="0" max="255" value="0">
-            </div>
-            
-            <!-- 蓝色滑块 -->
-            <div class="slider-container">
-                <div class="slider-label">
-                    <span style="color: #0000ff;">蓝色光 (B)</span>
-                    <span class="slider-value" id="blueValue">0</span>
-                </div>
-                <input type="range" id="blueSlider" class="blue-slider" min="0" max="255" value="0">
-            </div>
-            
-            <!-- 重置按钮 -->
-            <button class="reset-btn" id="resetBtn">重置所有颜色</button>
-        </div>
-    </div>
-    
-    <!-- 说明文字 -->
-    <div class="instructions">
-        <p>调整红、绿、蓝三种色光的强度（0-255），观察中间圆形的颜色变化</p>
-        <p>色光混合原理：红+绿=黄，红+蓝=品红，绿+蓝=青，红+绿+蓝=白</p>
-    </div>
+ <a href="index.html" class="home-btn">🏠 首页</a>
+ <!-- 页面主标题 -->
+ <h1>📐 York 周老师物理：光的三原色组合游戏</h1>
+ <!-- 主容器 -->
+ <div class="container">
+ <!-- 颜色显示区域 -->
+ <div class="color-display">
+ <!-- 颜色圆形 -->
+ <div class="color-circle" id="colorCircle"></div>
+ <!-- 颜色值显示 -->
+ <div class="color-value" id="colorValue">RGB(0, 0, 0)</div>
+ </div>
+ <!-- 控制面板 -->
+ <div class="controls">
+ <!-- 红色滑块 -->
+ <div class="slider-container">
+ <div class="slider-label">
+ <span style="color: #ff0000;">红色光 (R)</span>
+ <span class="slider-value" id="redValue">0</span>
+ </div>
+ <input type="range" id="redSlider" class="red-slider" min="0" max="255" value="0">
+ </div>
+ <!-- 绿色滑块 -->
+ <div class="slider-container">
+ <div class="slider-label">
+ <span style="color: #00ff00;">绿色光 (G)</span>
+ <span class="slider-value" id="greenValue">0</span>
+ </div>
+ <input type="range" id="greenSlider" class="green-slider" min="0" max="255" value="0">
+ </div>
+ <!-- 蓝色滑块 -->
+ <div class="slider-container">
+ <div class="slider-label">
+ <span style="color: #0000ff;">蓝色光 (B)</span>
+ <span class="slider-value" id="blueValue">0</span>
+ </div>
+ <input type="range" id="blueSlider" class="blue-slider" min="0" max="255" value="0">
+ </div>
+ <!-- 重置按钮 -->
+ <button class="reset-btn" id="resetBtn">重置所有颜色</button>
+ </div>
+ </div>
+ <!-- 说明文字 -->
+ <div class="instructions">
+ <p>调整红、绿、蓝三种色光的强度（0-255），观察中间圆形的颜色变化</p>
+ <p>色光混合原理：红+绿=黄，红+蓝=品红，绿+蓝=青，红+绿+蓝=白</p>
+ </div>
+ <!-- JavaScript代码 -->
+ <script>
+ // 获取DOM元素
+ const colorCircle = document.getElementById('colorCircle'); // 颜色圆形元素
+ const colorValue = document.getElementById('colorValue'); // 颜色值显示元素
+ const redSlider = document.getElementById('redSlider'); // 红色滑块
+ const greenSlider = document.getElementById('greenSlider'); // 绿色滑块
+ const blueSlider = document.getElementById('blueSlider'); // 蓝色滑块
+ const redValue = document.getElementById('redValue'); // 红色值显示
+ const greenValue = document.getElementById('greenValue'); // 绿色值显示
+ const blueValue = document.getElementById('blueValue'); // 蓝色值显示
+ const resetBtn = document.getElementById('resetBtn'); // 重置按钮
 
-    <!-- JavaScript代码 -->
-    <script>
-        // 获取DOM元素
-        const colorCircle = document.getElementById('colorCircle');  // 颜色圆形元素
-        const colorValue = document.getElementById('colorValue');  // 颜色值显示元素
-        const redSlider = document.getElementById('redSlider');  // 红色滑块
-        const greenSlider = document.getElementById('greenSlider');  // 绿色滑块
-        const blueSlider = document.getElementById('blueSlider');  // 蓝色滑块
-        const redValue = document.getElementById('redValue');  // 红色值显示
-        const greenValue = document.getElementById('greenValue');  // 绿色值显示
-        const blueValue = document.getElementById('blueValue');  // 蓝色值显示
-        const resetBtn = document.getElementById('resetBtn');  // 重置按钮
-        
-        // 初始化颜色值
-        let red = 0;  // 红色分量初始值
-        let green = 0;  // 绿色分量初始值
-        let blue = 0;  // 蓝色分量初始值
-        
-        /**
-         * 更新颜色显示
-         * 根据当前RGB值更新圆形颜色和显示文本
-         */
-        function updateColor() {
-            // 设置圆形背景颜色
-            colorCircle.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
-            
-            // 更新颜色值显示文本
-            colorValue.textContent = `RGB(${red}, ${green}, ${blue})`;
-            
-            // 更新滑块值显示
-            redValue.textContent = red;
-            greenValue.textContent = green;
-            blueValue.textContent = blue;
-        }
-        
-        /**
-         * 红色滑块输入事件监听
-         * 根据滑块值更新红色分量并更新颜色显示
-         */
-        redSlider.addEventListener('input', () => {
-            red = parseInt(redSlider.value);  // 获取滑块值并转换为整数
-            updateColor();  // 更新颜色显示
-        });
-        
-        /**
-         * 绿色滑块输入事件监听
-         * 根据滑块值更新绿色分量并更新颜色显示
-         */
-        greenSlider.addEventListener('input', () => {
-            green = parseInt(greenSlider.value);  // 获取滑块值并转换为整数
-            updateColor();  // 更新颜色显示
-        });
-        
-        /**
-         * 蓝色滑块输入事件监听
-         * 根据滑块值更新蓝色分量并更新颜色显示
-         */
-        blueSlider.addEventListener('input', () => {
-            blue = parseInt(blueSlider.value);  // 获取滑块值并转换为整数
-            updateColor();  // 更新颜色显示
-        });
-        
-        /**
-         * 重置按钮点击事件监听
-         * 将所有颜色分量重置为0
-         */
-        resetBtn.addEventListener('click', () => {
-            red = 0;  // 重置红色分量
-            green = 0;  // 重置绿色分量
-            blue = 0;  // 重置蓝色分量
-            
-            // 重置滑块位置
-            redSlider.value = 0;
-            greenSlider.value = 0;
-            blueSlider.value = 0;
-            
-            updateColor();  // 更新颜色显示
-        });
-        
-        // 初始化：更新初始颜色显示
-        updateColor();
-    </script>
+ // 初始化颜色值
+ let red = 0; // 红色分量初始值
+ let green = 0; // 绿色分量初始值
+ let blue = 0; // 蓝色分量初始值
+
+ /**
+ * 更新颜色显示
+ * 根据当前RGB值更新圆形颜色和显示文本
+ */
+ function updateColor() {
+ // 设置圆形背景颜色
+ colorCircle.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+
+ // 更新颜色值显示文本
+ colorValue.textContent = `RGB(${red}, ${green}, ${blue})`;
+
+ // 更新滑块值显示
+ redValue.textContent = red;
+ greenValue.textContent = green;
+ blueValue.textContent = blue;
+ }
+
+ /**
+ * 红色滑块输入事件监听
+ * 根据滑块值更新红色分量并更新颜色显示
+ */
+ redSlider.addEventListener('input', () => {
+ red = parseInt(redSlider.value); // 获取滑块值并转换为整数
+ updateColor(); // 更新颜色显示
+ });
+
+ /**
+ * 绿色滑块输入事件监听
+ * 根据滑块值更新绿色分量并更新颜色显示
+ */
+ greenSlider.addEventListener('input', () => {
+ green = parseInt(greenSlider.value); // 获取滑块值并转换为整数
+ updateColor(); // 更新颜色显示
+ });
+
+ /**
+ * 蓝色滑块输入事件监听
+ * 根据滑块值更新蓝色分量并更新颜色显示
+ */
+ blueSlider.addEventListener('input', () => {
+ blue = parseInt(blueSlider.value); // 获取滑块值并转换为整数
+ updateColor(); // 更新颜色显示
+ });
+
+ /**
+ * 重置按钮点击事件监听
+ * 将所有颜色分量重置为0
+ */
+ resetBtn.addEventListener('click', () => {
+ red = 0; // 重置红色分量
+ green = 0; // 重置绿色分量
+ blue = 0; // 重置蓝色分量
+
+ // 重置滑块位置
+ redSlider.value = 0;
+ greenSlider.value = 0;
+ blueSlider.value = 0;
+
+ updateColor(); // 更新颜色显示
+ });
+
+ // 初始化：更新初始颜色显示
+ updateColor();
+ </script>
 </body>
 </html>

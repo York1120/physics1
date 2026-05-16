@@ -1,479 +1,499 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 基础图标 -->
-    <link rel="icon" href="/images/logo.ico" type="image/x-icon">
-    <!-- 兼容微信/手机端的高清图标 -->
-    <link rel="icon" href="/images/logo.png" type="image/png" sizes="32x32">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>频率发声器</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        .control-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        .slider-container {
-            display: flex;
-            align-items: center;
-        }
-        input[type="range"] {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .input-group {
-            display: flex;
-            align-items: center;
-        }
-        input[type="number"] {
-            width: 80px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            -moz-appearance: textfield;
-        }
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .step-buttons {
-            display: flex;
-            flex-direction: column;
-            margin-left: 5px;
-        }
-        .step-button {
-            width: 30px;
-            height: 20px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            user-select: none;
-        }
-        .step-button:first-child {
-            border-radius: 4px 4px 0 0;
-            margin-bottom: 1px;
-        }
-        .step-button:last-child {
-            border-radius: 0 0 4px 4px;
-        }
-        .step-button:hover {
-            background-color: #e0e0e0;
-        }
-        .step-button:active {
-            background-color: #d0d0d0;
-        }
-        .play-button {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-bottom: 20px;
-        }
-        .play-button:hover {
-            background-color: #45a049;
-        }
-        .play-button:active {
-            background-color: #3d8b40;
-        }
-        .unit {
-            margin-left: 5px;
-            color: #666;
-        }
-        .preset-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .preset-button {
-            padding: 6px 12px;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .preset-button:hover {
-            background-color: #e0e0e0;
-        }
-        .preset-button:active {
-            background-color: #d0d0d0;
-        }
-        #oscilloscope {
-            width: 100%;
-            height: 200px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            position: relative;
-            overflow: hidden;
-        }
-        #waveform {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-        .oscilloscope-info {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            z-index: 10;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+ <!-- 基础图标 -->
+ <link rel="icon" href="/images/logo.ico" type="image/x-icon">
+ <!-- 兼容微信/手机端的高清图标 -->
+ <link rel="icon" href="/images/logo.png" type="image/png" sizes="32x32">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>York 周老师物理：频率发声器</title>
+ <style>
+ body {
+ font-family: Arial, sans-serif;
+ max-width: 600px;
+ margin: 0 auto;
+ padding: 20px;
+ background-color: #f5f5f5;
+ }
+ .container {
+ background-color: white;
+ padding: 20px;
+ border-radius: 10px;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ }
+ h1 {
+ color: #333;
+ text-align: center;
+ }
+ .control-group {
+ margin-bottom: 20px;
+ }
+ label {
+ display: block;
+ margin-bottom: 5px;
+ font-weight: bold;
+ }
+ .slider-container {
+ display: flex;
+ align-items: center;
+ }
+ input[type="range"] {
+ flex-grow: 1;
+ margin-right: 10px;
+ }
+ .input-group {
+ display: flex;
+ align-items: center;
+ }
+ input[type="number"] {
+ width: 80px;
+ padding: 5px;
+ border: 1px solid #ddd;
+ border-radius: 4px;
+ -moz-appearance: textfield;
+ }
+ input[type="number"]::-webkit-outer-spin-button,
+ input[type="number"]::-webkit-inner-spin-button {
+ -webkit-appearance: none;
+ margin: 0;
+ }
+ .step-buttons {
+ display: flex;
+ flex-direction: column;
+ margin-left: 5px;
+ }
+ .step-button {
+ width: 30px;
+ height: 20px;
+ background-color: #f0f0f0;
+ border: 1px solid #ddd;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ cursor: pointer;
+ user-select: none;
+ }
+ .step-button:first-child {
+ border-radius: 4px 4px 0 0;
+ margin-bottom: 1px;
+ }
+ .step-button:last-child {
+ border-radius: 0 0 4px 4px;
+ }
+ .step-button:hover {
+ background-color: #e0e0e0;
+ }
+ .step-button:active {
+ background-color: #d0d0d0;
+ }
+ .play-button {
+ display: block;
+ width: 100%;
+ padding: 10px;
+ background-color: #4CAF50;
+ color: white;
+ border: none;
+ border-radius: 5px;
+ font-size: 16px;
+ cursor: pointer;
+ transition: background-color 0.3s;
+ margin-bottom: 20px;
+ }
+ .play-button:hover {
+ background-color: #45a049;
+ }
+ .play-button:active {
+ background-color: #3d8b40;
+ }
+ .unit {
+ margin-left: 5px;
+ color: #666;
+ }
+ .preset-buttons {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+ margin-bottom: 15px;
+ }
+ .preset-button {
+ padding: 6px 12px;
+ background-color: #f0f0f0;
+ border: 1px solid #ddd;
+ border-radius: 4px;
+ cursor: pointer;
+ transition: all 0.2s;
+ }
+ .preset-button:hover {
+ background-color: #e0e0e0;
+ }
+ .preset-button:active {
+ background-color: #d0d0d0;
+ }
+ #oscilloscope {
+ width: 100%;
+ height: 200px;
+ background-color: #f9f9f9;
+ border: 1px solid #ddd;
+ border-radius: 5px;
+ position: relative;
+ overflow: hidden;
+ }
+ #waveform {
+ position: absolute;
+ width: 100%;
+ height: 100%;
+ }
+ .oscilloscope-info {
+ position: absolute;
+ bottom: 10px;
+ right: 10px;
+ background-color: rgba(255, 255, 255, 0.8);
+ padding: 5px 10px;
+ border-radius: 4px;
+ font-size: 14px;
+ z-index: 10;
+ }
+ canvas {
+ display: block;
+ }
+ .home-btn {
+ position: fixed;
+ top: 12px;
+ left: 12px;
+ z-index: 9999;
+ background: rgba(0,0,0,0.55);
+ color: #fff;
+ padding: 6px 14px;
+ border-radius: 6px;
+ text-decoration: none;
+ font-size: 14px;
+ font-weight: bold;
+ backdrop-filter: blur(4px);
+ border: 1px solid rgba(255,255,255,0.15);
+ transition: background 0.2s;
+ }
+ .home-btn:hover {
+ background: rgba(0,0,0,0.75);
+ }
+ </style>
 </head>
 <body>
-    <div class="container">
-        <h1>频率发声器</h1>
-        
-        <div class="preset-buttons">
-            <button class="preset-button" data-frequency="100">100Hz</button>
-            <button class="preset-button" data-frequency="200">200Hz</button>
-            <button class="preset-button" data-frequency="400">400Hz</button>
-            <button class="preset-button" data-frequency="800">800Hz</button>
-            <button class="preset-button" data-frequency="1600">1600Hz</button>
-            <button class="preset-button" data-frequency="3200">3200Hz</button>
-            <button class="preset-button" data-frequency="6400">6400Hz</button>
-        </div>
-        
-        <div class="control-group">
-            <label for="frequency">频率: <span id="frequency-value">440</span><span class="unit">Hz</span></label>
-            <div class="slider-container">
-                <input type="range" id="frequency" min="0" max="20000" value="440" step="1">
-                <div class="input-group">
-                    <input type="number" id="frequency-input" min="0" max="20000" value="440">
-                    <div class="step-buttons">
-                        <div class="step-button" id="frequency-up">▲</div>
-                        <div class="step-button" id="frequency-down">▼</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <label for="amplitude">振幅: <span id="amplitude-value">50</span></label>
-            <div class="slider-container">
-                <input type="range" id="amplitude" min="0" max="100" value="50">
-                <div class="input-group">
-                    <input type="number" id="amplitude-input" min="0" max="100" value="50">
-                    <div class="step-buttons">
-                        <div class="step-button" id="amplitude-up">▲</div>
-                        <div class="step-button" id="amplitude-down">▼</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <button id="play-button" class="play-button">Play</button>
-        
-        <div id="oscilloscope">
-            <canvas id="waveform"></canvas>
-            <div class="oscilloscope-info">
-                <span id="osc-freq">频率: 440Hz</span> | 
-                <span id="osc-amp">振幅: 50</span>
-            </div>
-        </div>
-    </div>
+ <a href="index.html" class="home-btn">🏠 首页</a>
+ <div class="container">
+ <h1>📐 York 周老师物理：频率发声器</h1>
 
-    <script>
-        // 获取DOM元素
-        const frequencySlider = document.getElementById('frequency');
-        const frequencyInput = document.getElementById('frequency-input');
-        const frequencyValue = document.getElementById('frequency-value');
-        const frequencyUp = document.getElementById('frequency-up');
-        const frequencyDown = document.getElementById('frequency-down');
-        
-        const amplitudeSlider = document.getElementById('amplitude');
-        const amplitudeInput = document.getElementById('amplitude-input');
-        const amplitudeValue = document.getElementById('amplitude-value');
-        const amplitudeUp = document.getElementById('amplitude-up');
-        const amplitudeDown = document.getElementById('amplitude-down');
-        
-        const playButton = document.getElementById('play-button');
-        const presetButtons = document.querySelectorAll('.preset-button');
-        
-        // 示波器元素
-        const oscilloscope = document.getElementById('oscilloscope');
-        const waveformCanvas = document.getElementById('waveform');
-        const ctx = waveformCanvas.getContext('2d');
-        const oscFreqInfo = document.getElementById('osc-freq');
-        const oscAmpInfo = document.getElementById('osc-amp');
-        
-        // 调整画布大小
-        function resizeCanvas() {
-            waveformCanvas.width = oscilloscope.offsetWidth;
-            waveformCanvas.height = oscilloscope.offsetHeight;
-        }
-        
-        // 音频上下文
-        let audioContext;
-        let oscillator;
-        let gainNode;
-        let analyser;
-        let isPlaying = false;
-        let animationId;
-        let dataArray;
-        
-        // 初始化音频上下文
-        function initAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-            }
-        }
-        
-        // 更新频率显示
-        function updateFrequencyDisplay(value) {
-            frequencyValue.textContent = value;
-            oscFreqInfo.textContent = `频率: ${value}Hz`;
-        }
-        
-        // 更新振幅显示
-        function updateAmplitudeDisplay(value) {
-            amplitudeValue.textContent = value;
-            oscAmpInfo.textContent = `振幅: ${value}`;
-        }
-        
-        // 设置频率
-        function setFrequency(value) {
-            frequencySlider.value = value;
-            frequencyInput.value = value;
-            updateFrequencyDisplay(value);
-            
-            if (isPlaying) {
-                oscillator.frequency.setValueAtTime(value, audioContext.currentTime);
-            }
-        }
-        
-        // 设置振幅
-        function setAmplitude(value) {
-            amplitudeSlider.value = value;
-            amplitudeInput.value = value;
-            updateAmplitudeDisplay(value);
-            
-            if (isPlaying) {
-                gainNode.gain.setValueAtTime(value / 100, audioContext.currentTime);
-            }
-        }
-        
-        // 绘制波形
-        function drawWaveform() {
-            if (!isPlaying) return;
-            
-            const width = waveformCanvas.width;
-            const height = waveformCanvas.height;
-            
-            analyser.getByteTimeDomainData(dataArray);
-            
-            ctx.fillStyle = '#f9f9f9';
-            ctx.fillRect(0, 0, width, height);
-            
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#4CAF50';
-            ctx.beginPath();
-            
-            const sliceWidth = width / analyser.fftSize;
-            let x = 0;
-            
-            for (let i = 0; i < analyser.fftSize; i++) {
-                const v = dataArray[i] / 128.0;
-                const y = v * height / 2;
-                
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-                
-                x += sliceWidth;
-            }
-            
-            ctx.lineTo(width, height / 2);
-            ctx.stroke();
-            
-            animationId = requestAnimationFrame(drawWaveform);
-        }
-        
-        // 播放声音
-        function playSound() {
-            if (isPlaying) return;
-            
-            initAudioContext();
-            resizeCanvas();
-            
-            const frequency = parseFloat(frequencyInput.value);
-            const amplitude = parseFloat(amplitudeInput.value) / 100;
-            
-            oscillator = audioContext.createOscillator();
-            gainNode = audioContext.createGain();
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(amplitude, audioContext.currentTime);
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(analyser);
-            analyser.connect(audioContext.destination);
-            
-            dataArray = new Uint8Array(analyser.fftSize);
-            
-            oscillator.start();
-            isPlaying = true;
-            playButton.textContent = 'Stop';
-            
-            drawWaveform();
-        }
-        
-        // 停止声音
-        function stopSound() {
-            if (!isPlaying) return;
-            
-            oscillator.stop();
-            cancelAnimationFrame(animationId);
-            isPlaying = false;
-            playButton.textContent = 'Play';
-            
-            // 清除波形
-            ctx.fillStyle = '#f9f9f9';
-            ctx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
-        }
-        
-        // 切换播放/停止
-        function toggleSound() {
-            if (isPlaying) {
-                stopSound();
-            } else {
-                playSound();
-            }
-        }
-        
-        // 事件监听器
-        frequencySlider.addEventListener('input', function() {
-            const value = this.value;
-            frequencyInput.value = value;
-            updateFrequencyDisplay(value);
-            
-            if (isPlaying) {
-                oscillator.frequency.setValueAtTime(value, audioContext.currentTime);
-            }
-        });
-        
-        frequencyInput.addEventListener('input', function() {
-            let value = Math.min(Math.max(this.value, 0), 20000);
-            this.value = value;
-            frequencySlider.value = value;
-            updateFrequencyDisplay(value);
-            
-            if (isPlaying) {
-                oscillator.frequency.setValueAtTime(value, audioContext.currentTime);
-            }
-        });
-        
-        frequencyUp.addEventListener('click', function() {
-            let value = parseInt(frequencyInput.value) + 1;
-            if (value > 20000) value = 20000;
-            setFrequency(value);
-        });
-        
-        frequencyDown.addEventListener('click', function() {
-            let value = parseInt(frequencyInput.value) - 1;
-            if (value < 0) value = 0;
-            setFrequency(value);
-        });
-        
-        amplitudeSlider.addEventListener('input', function() {
-            const value = this.value;
-            amplitudeInput.value = value;
-            updateAmplitudeDisplay(value);
-            
-            if (isPlaying) {
-                gainNode.gain.setValueAtTime(value / 100, audioContext.currentTime);
-            }
-        });
-        
-        amplitudeInput.addEventListener('input', function() {
-            let value = Math.min(Math.max(this.value, 0), 100);
-            this.value = value;
-            amplitudeSlider.value = value;
-            updateAmplitudeDisplay(value);
-            
-            if (isPlaying) {
-                gainNode.gain.setValueAtTime(value / 100, audioContext.currentTime);
-            }
-        });
-        
-        amplitudeUp.addEventListener('click', function() {
-            let value = parseInt(amplitudeInput.value) + 1;
-            if (value > 100) value = 100;
-            setAmplitude(value);
-        });
-        
-        amplitudeDown.addEventListener('click', function() {
-            let value = parseInt(amplitudeInput.value) - 1;
-            if (value < 0) value = 0;
-            setAmplitude(value);
-        });
-        
-        playButton.addEventListener('click', toggleSound);
-        
-        // 预设按钮事件监听
-        presetButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const frequency = parseInt(this.dataset.frequency);
-                setFrequency(frequency);
-            });
-        });
-        
-        // 窗口大小改变时调整画布
-        window.addEventListener('resize', function() {
-            resizeCanvas();
-            if (isPlaying) {
-                drawWaveform();
-            }
-        });
-        
-        // 初始化显示
-        updateFrequencyDisplay(frequencySlider.value);
-        updateAmplitudeDisplay(amplitudeSlider.value);
-        resizeCanvas();
-    </script>
+ <div class="preset-buttons">
+ <button class="preset-button" data-frequency="100">100Hz</button>
+ <button class="preset-button" data-frequency="200">200Hz</button>
+ <button class="preset-button" data-frequency="400">400Hz</button>
+ <button class="preset-button" data-frequency="800">800Hz</button>
+ <button class="preset-button" data-frequency="1600">1600Hz</button>
+ <button class="preset-button" data-frequency="3200">3200Hz</button>
+ <button class="preset-button" data-frequency="6400">6400Hz</button>
+ </div>
+
+ <div class="control-group">
+ <label for="frequency">频率: <span id="frequency-value">440</span><span class="unit">Hz</span></label>
+ <div class="slider-container">
+ <input type="range" id="frequency" min="0" max="20000" value="440" step="1">
+ <div class="input-group">
+ <input type="number" id="frequency-input" min="0" max="20000" value="440">
+ <div class="step-buttons">
+ <div class="step-button" id="frequency-up">▲</div>
+ <div class="step-button" id="frequency-down">▼</div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <div class="control-group">
+ <label for="amplitude">振幅: <span id="amplitude-value">50</span></label>
+ <div class="slider-container">
+ <input type="range" id="amplitude" min="0" max="100" value="50">
+ <div class="input-group">
+ <input type="number" id="amplitude-input" min="0" max="100" value="50">
+ <div class="step-buttons">
+ <div class="step-button" id="amplitude-up">▲</div>
+ <div class="step-button" id="amplitude-down">▼</div>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ <button id="play-button" class="play-button">Play</button>
+
+ <div id="oscilloscope">
+ <canvas id="waveform"></canvas>
+ <div class="oscilloscope-info">
+ <span id="osc-freq">频率: 440Hz</span> |
+ <span id="osc-amp">振幅: 50</span>
+ </div>
+ </div>
+ </div>
+
+ <script>
+ // 获取DOM元素
+ const frequencySlider = document.getElementById('frequency');
+ const frequencyInput = document.getElementById('frequency-input');
+ const frequencyValue = document.getElementById('frequency-value');
+ const frequencyUp = document.getElementById('frequency-up');
+ const frequencyDown = document.getElementById('frequency-down');
+
+ const amplitudeSlider = document.getElementById('amplitude');
+ const amplitudeInput = document.getElementById('amplitude-input');
+ const amplitudeValue = document.getElementById('amplitude-value');
+ const amplitudeUp = document.getElementById('amplitude-up');
+ const amplitudeDown = document.getElementById('amplitude-down');
+
+ const playButton = document.getElementById('play-button');
+ const presetButtons = document.querySelectorAll('.preset-button');
+
+ // 示波器元素
+ const oscilloscope = document.getElementById('oscilloscope');
+ const waveformCanvas = document.getElementById('waveform');
+ const ctx = waveformCanvas.getContext('2d');
+ const oscFreqInfo = document.getElementById('osc-freq');
+ const oscAmpInfo = document.getElementById('osc-amp');
+
+ // 调整画布大小
+ function resizeCanvas() {
+ waveformCanvas.width = oscilloscope.offsetWidth;
+ waveformCanvas.height = oscilloscope.offsetHeight;
+ }
+
+ // 音频上下文
+ let audioContext;
+ let oscillator;
+ let gainNode;
+ let analyser;
+ let isPlaying = false;
+ let animationId;
+ let dataArray;
+
+ // 初始化音频上下文
+ function initAudioContext() {
+ if (!audioContext) {
+ audioContext = new (window.AudioContext || window.webkitAudioContext)();
+ analyser = audioContext.createAnalyser();
+ analyser.fftSize = 2048;
+ }
+ }
+
+ // 更新频率显示
+ function updateFrequencyDisplay(value) {
+ frequencyValue.textContent = value;
+ oscFreqInfo.textContent = `频率: ${value}Hz`;
+ }
+
+ // 更新振幅显示
+ function updateAmplitudeDisplay(value) {
+ amplitudeValue.textContent = value;
+ oscAmpInfo.textContent = `振幅: ${value}`;
+ }
+
+ // 设置频率
+ function setFrequency(value) {
+ frequencySlider.value = value;
+ frequencyInput.value = value;
+ updateFrequencyDisplay(value);
+
+ if (isPlaying) {
+ oscillator.frequency.setValueAtTime(value, audioContext.currentTime);
+ }
+ }
+
+ // 设置振幅
+ function setAmplitude(value) {
+ amplitudeSlider.value = value;
+ amplitudeInput.value = value;
+ updateAmplitudeDisplay(value);
+
+ if (isPlaying) {
+ gainNode.gain.setValueAtTime(value / 100, audioContext.currentTime);
+ }
+ }
+
+ // 绘制波形
+ function drawWaveform() {
+ if (!isPlaying) return;
+
+ const width = waveformCanvas.width;
+ const height = waveformCanvas.height;
+
+ analyser.getByteTimeDomainData(dataArray);
+
+ ctx.fillStyle = '#f9f9f9';
+ ctx.fillRect(0, 0, width, height);
+
+ ctx.lineWidth = 2;
+ ctx.strokeStyle = '#4CAF50';
+ ctx.beginPath();
+
+ const sliceWidth = width / analyser.fftSize;
+ let x = 0;
+
+ for (let i = 0; i < analyser.fftSize; i++) {
+ const v = dataArray[i] / 128.0;
+ const y = v * height / 2;
+
+ if (i === 0) {
+ ctx.moveTo(x, y);
+ } else {
+ ctx.lineTo(x, y);
+ }
+
+ x += sliceWidth;
+ }
+
+ ctx.lineTo(width, height / 2);
+ ctx.stroke();
+
+ animationId = requestAnimationFrame(drawWaveform);
+ }
+
+ // 播放声音
+ function playSound() {
+ if (isPlaying) return;
+
+ initAudioContext();
+ resizeCanvas();
+
+ const frequency = parseFloat(frequencyInput.value);
+ const amplitude = parseFloat(amplitudeInput.value) / 100;
+
+ oscillator = audioContext.createOscillator();
+ gainNode = audioContext.createGain();
+
+ oscillator.type = 'sine';
+ oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+ gainNode.gain.setValueAtTime(amplitude, audioContext.currentTime);
+
+ oscillator.connect(gainNode);
+ gainNode.connect(analyser);
+ analyser.connect(audioContext.destination);
+
+ dataArray = new Uint8Array(analyser.fftSize);
+
+ oscillator.start();
+ isPlaying = true;
+ playButton.textContent = 'Stop';
+
+ drawWaveform();
+ }
+
+ // 停止声音
+ function stopSound() {
+ if (!isPlaying) return;
+
+ oscillator.stop();
+ cancelAnimationFrame(animationId);
+ isPlaying = false;
+ playButton.textContent = 'Play';
+
+ // 清除波形
+ ctx.fillStyle = '#f9f9f9';
+ ctx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+ }
+
+ // 切换播放/停止
+ function toggleSound() {
+ if (isPlaying) {
+ stopSound();
+ } else {
+ playSound();
+ }
+ }
+
+ // 事件监听器
+ frequencySlider.addEventListener('input', function() {
+ const value = this.value;
+ frequencyInput.value = value;
+ updateFrequencyDisplay(value);
+
+ if (isPlaying) {
+ oscillator.frequency.setValueAtTime(value, audioContext.currentTime);
+ }
+ });
+
+ frequencyInput.addEventListener('input', function() {
+ let value = Math.min(Math.max(this.value, 0), 20000);
+ this.value = value;
+ frequencySlider.value = value;
+ updateFrequencyDisplay(value);
+
+ if (isPlaying) {
+ oscillator.frequency.setValueAtTime(value, audioContext.currentTime);
+ }
+ });
+
+ frequencyUp.addEventListener('click', function() {
+ let value = parseInt(frequencyInput.value) + 1;
+ if (value > 20000) value = 20000;
+ setFrequency(value);
+ });
+
+ frequencyDown.addEventListener('click', function() {
+ let value = parseInt(frequencyInput.value) - 1;
+ if (value < 0) value = 0;
+ setFrequency(value);
+ });
+
+ amplitudeSlider.addEventListener('input', function() {
+ const value = this.value;
+ amplitudeInput.value = value;
+ updateAmplitudeDisplay(value);
+
+ if (isPlaying) {
+ gainNode.gain.setValueAtTime(value / 100, audioContext.currentTime);
+ }
+ });
+
+ amplitudeInput.addEventListener('input', function() {
+ let value = Math.min(Math.max(this.value, 0), 100);
+ this.value = value;
+ amplitudeSlider.value = value;
+ updateAmplitudeDisplay(value);
+
+ if (isPlaying) {
+ gainNode.gain.setValueAtTime(value / 100, audioContext.currentTime);
+ }
+ });
+
+ amplitudeUp.addEventListener('click', function() {
+ let value = parseInt(amplitudeInput.value) + 1;
+ if (value > 100) value = 100;
+ setAmplitude(value);
+ });
+
+ amplitudeDown.addEventListener('click', function() {
+ let value = parseInt(amplitudeInput.value) - 1;
+ if (value < 0) value = 0;
+ setAmplitude(value);
+ });
+
+ playButton.addEventListener('click', toggleSound);
+
+ // 预设按钮事件监听
+ presetButtons.forEach(button => {
+ button.addEventListener('click', function() {
+ const frequency = parseInt(this.dataset.frequency);
+ setFrequency(frequency);
+ });
+ });
+
+ // 窗口大小改变时调整画布
+ window.addEventListener('resize', function() {
+ resizeCanvas();
+ if (isPlaying) {
+ drawWaveform();
+ }
+ });
+
+ // 初始化显示
+ updateFrequencyDisplay(frequencySlider.value);
+ updateAmplitudeDisplay(amplitudeSlider.value);
+ resizeCanvas();
+ </script>
 </body>
 </html>
